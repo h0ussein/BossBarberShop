@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path';
 import conn from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
@@ -16,14 +17,18 @@ import { seedInitialData } from './utils/seedData.js';
 // Load env vars
 dotenv.config();
 
+const __dirname = path.resolve();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-}));
+// Trust proxy - required for rate limiting behind reverse proxy (e.g., Render.com)
+app.set('trust proxy', 1);
+
+// Middleware - Only use CORS in development
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors());
+}
 app.use(express.json());
 
 // Routes
@@ -36,20 +41,12 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
 
-// Health check
-app.get('/', (req, res) => {
+// Health check (API)
+app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'BOSS Barbershop API is running',
     version: '1.0.0',
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
   });
 });
 
@@ -61,6 +58,21 @@ app.use((err, req, res, next) => {
     message: 'Internal server error',
   });
 });
+
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+  // Serve React app for all non-API routes
+  app.use((req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend', 'dist', 'index.html'));
+  });
+} else {
+  // In development, redirect root to frontend
+  app.get('/', (req, res) => {
+    res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
+  });
+}
 
 // Connect to DB and start server
 conn()
