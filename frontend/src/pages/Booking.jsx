@@ -20,10 +20,14 @@ const Booking = () => {
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    // Only fetch if we haven't fetched before
+    if (!hasFetched) {
+      fetchData();
+    }
+  }, [hasFetched]);
 
   // Fetch barber's schedule when barber is selected
   useEffect(() => {
@@ -35,6 +39,8 @@ const Booking = () => {
   }, [formData.barber]);
 
   const fetchData = async () => {
+    if (hasFetched) return; // Prevent duplicate fetches
+    
     try {
       const [barbersRes, servicesRes, settingsRes] = await Promise.all([
         barbersAPI.getAll(true),
@@ -44,6 +50,7 @@ const Booking = () => {
       setBarbers(barbersRes.data.barbers);
       setServices(servicesRes.data.services);
       setSettings(settingsRes.data.settings);
+      setHasFetched(true);
     } catch (error) {
       toast.error('Failed to load data');
     } finally {

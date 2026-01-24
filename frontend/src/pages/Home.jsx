@@ -1,23 +1,33 @@
 import { useState, useEffect } from 'react';
-import { servicesAPI, settingsAPI } from '../services/api';
+import { servicesAPI, settingsAPI, homepageSectionsAPI } from '../services/api';
 
 const Home = ({ onBook }) => {
   const [services, setServices] = useState([]);
   const [settings, setSettings] = useState(null);
+  const [homepageSections, setHomepageSections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    // Only fetch if we haven't fetched before
+    if (!hasFetched) {
+      fetchData();
+    }
+  }, [hasFetched]);
 
   const fetchData = async () => {
+    if (hasFetched) return; // Prevent duplicate fetches
+    
     try {
-      const [servicesRes, settingsRes] = await Promise.all([
+      const [servicesRes, settingsRes, sectionsRes] = await Promise.all([
         servicesAPI.getAll(true),
         settingsAPI.get(),
+        homepageSectionsAPI.getAll(),
       ]);
       setServices(servicesRes.data.services);
       setSettings(settingsRes.data.settings);
+      setHomepageSections(sectionsRes.data.sections || []);
+      setHasFetched(true);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
@@ -101,6 +111,33 @@ const Home = ({ onBook }) => {
           ))}
         </ul>
       </section>
+
+      {/* Homepage Sections */}
+      {homepageSections.length > 0 && (
+        <>
+          {homepageSections.map((section) => (
+            <section
+              key={section._id}
+              className="rounded-3xl border border-black/10 bg-white overflow-hidden"
+            >
+              <div className="aspect-video w-full overflow-hidden">
+                <img
+                  src={section.image.url}
+                  alt={section.description || 'Homepage section'}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              {section.description && (
+                <div className="p-6 md:p-8">
+                  <p className="text-sm leading-relaxed text-black/70 md:text-base">
+                    {section.description}
+                  </p>
+                </div>
+              )}
+            </section>
+          ))}
+        </>
+      )}
     </div>
   );
 };

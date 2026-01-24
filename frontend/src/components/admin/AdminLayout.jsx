@@ -55,6 +55,16 @@ const navItems = [
     ),
   },
   {
+    id: 'homepage-sections',
+    label: 'Homepage Sections',
+    path: '/adminR/homepage-sections',
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-6.364-9.364l2.909-2.909m0 0l2.909 2.909-6.364 6.364m-2.909-9.364l-6.364 6.364" />
+      </svg>
+    ),
+  },
+  {
     id: 'settings',
     label: 'Settings',
     path: '/adminR/settings',

@@ -78,7 +78,9 @@ const Auth = () => {
       // Already on auth page
       return;
     }
-    navigate('/');
+    // Navigate to main app with the selected tab using hash
+    // Use replace: false to allow browser back button to work
+    navigate(`/#${tabId}`);
   };
 
   const handleChange = (e) => {

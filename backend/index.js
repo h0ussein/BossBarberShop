@@ -11,6 +11,7 @@ import serviceRoutes from './routes/serviceRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import homepageSectionRoutes from './routes/homepageSectionRoutes.js';
 import { seedDefaultAdmin } from './utils/seedAdmin.js';
 import { seedInitialData } from './utils/seedData.js';
 
@@ -40,6 +41,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/homepage-sections', homepageSectionRoutes);
 
 // Health check (API)
 app.get('/api/health', (req, res) => {

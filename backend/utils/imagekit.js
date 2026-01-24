@@ -6,4 +6,17 @@ const imagekit = new ImageKit({
   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
+/**
+ * Delete image from ImageKit
+ */
+export const deleteImageFromImageKit = async (fileId) => {
+  try {
+    await imagekit.deleteFile(fileId);
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting image from ImageKit:', error);
+    throw error;
+  }
+};
+
 export default imagekit;

@@ -306,4 +306,40 @@ export const uploadAPI = {
   getAuthParamsBarber: () => barberApiCall('/upload/auth'),
 };
 
+// Homepage Sections API
+export const homepageSectionsAPI = {
+  // Public - get active sections
+  getAll: () => apiCall('/homepage-sections'),
+
+  // Admin - get all sections (including inactive)
+  getAllAdmin: () => adminApiCall('/homepage-sections/admin/all'),
+
+  // Admin - create section
+  create: (data) =>
+    adminApiCall('/homepage-sections/admin', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Admin - update section
+  update: (id, data) =>
+    adminApiCall(`/homepage-sections/admin/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Admin - delete section
+  delete: (id) =>
+    adminApiCall(`/homepage-sections/admin/${id}`, {
+      method: 'DELETE',
+    }),
+
+  // Admin - reorder sections
+  reorder: (sections) =>
+    adminApiCall('/homepage-sections/admin/reorder', {
+      method: 'PUT',
+      body: JSON.stringify({ sections }),
+    }),
+};
+
 export default apiCall;

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import MobileShell from './components/MobileShell';
 import Home from './pages/Home';
 import Booking from './pages/Booking';
@@ -58,23 +58,42 @@ const navItems = [
 ];
 
 const MainApp = () => {
-  const [activeTab, setActiveTab] = useState('home');
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  
+  // Get tab from URL hash or default to 'home'
+  const getTabFromUrl = () => {
+    const hash = location.hash.replace('#', '');
+    const validTabs = ['home', 'booking', 'contact', 'profile', 'offers'];
+    return validTabs.includes(hash) ? hash : 'home';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromUrl());
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Sync activeTab with URL hash on mount and location changes
+  useEffect(() => {
+    const tab = getTabFromUrl();
+    if (tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [location.hash]);
 
   const handleProfileClick = () => {
     if (!isAuthenticated) {
-      navigate('/auth');
+      navigate('/auth#profile');
     } else {
-      setActiveTab('profile');
+      navigate('#profile', { replace: true });
     }
   };
 
   const handleTabChange = (tabId) => {
     if (tabId === 'profile' && !isAuthenticated) {
-      navigate('/auth');
+      navigate('/auth#profile');
     } else {
+      // Update URL hash - this will trigger hashchange event
+      window.location.hash = tabId;
       setActiveTab(tabId);
     }
   };
