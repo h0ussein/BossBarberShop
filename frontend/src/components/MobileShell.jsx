@@ -1,6 +1,8 @@
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
 import SideDrawer from './SideDrawer';
+import Footer from './Footer';
+import WhatsAppButton from './WhatsAppButton';
 
 const MobileShell = ({
   activeTab,
@@ -15,6 +17,9 @@ const MobileShell = ({
       <TopBar
         onMenuClick={() => setDrawerOpen(true)}
         onQuickBook={() => onTabChange('booking')}
+        navItems={navItems}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
       />
       <SideDrawer
         open={drawerOpen}
@@ -22,7 +27,9 @@ const MobileShell = ({
         items={navItems}
         onNavigate={onTabChange}
       />
-      <main className="mx-auto max-w-3xl px-4 pb-28 pt-6 md:px-6 lg:pb-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 pb-28 pt-6 md:px-6 lg:pb-8">{children}</main>
+      <Footer />
+      <WhatsAppButton />
       <BottomNav items={navItems} activeTab={activeTab} onChange={onTabChange} />
     </div>
   );

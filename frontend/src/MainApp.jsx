@@ -79,23 +79,6 @@ const MainApp = () => {
     }
   };
 
-  const renderPage = () => {
-    switch (activeTab) {
-      case 'home':
-        return <Home onBook={() => setActiveTab('booking')} />;
-      case 'booking':
-        return <Booking />;
-      case 'contact':
-        return <Contact />;
-      case 'profile':
-        return <Profile />;
-      case 'offers':
-        return <Offers />;
-      default:
-        return <Home onBook={() => setActiveTab('booking')} />;
-    }
-  };
-
   return (
     <MobileShell
       activeTab={activeTab}
@@ -104,7 +87,22 @@ const MainApp = () => {
       setDrawerOpen={setDrawerOpen}
       navItems={navItems}
     >
-      {renderPage()}
+      {/* Keep all pages mounted to preserve state and prevent refetching */}
+      <div className={activeTab === 'home' ? 'block' : 'hidden'}>
+        <Home onBook={() => setActiveTab('booking')} />
+      </div>
+      <div className={activeTab === 'booking' ? 'block' : 'hidden'}>
+        <Booking />
+      </div>
+      <div className={activeTab === 'contact' ? 'block' : 'hidden'}>
+        <Contact />
+      </div>
+      <div className={activeTab === 'profile' ? 'block' : 'hidden'}>
+        <Profile />
+      </div>
+      <div className={activeTab === 'offers' ? 'block' : 'hidden'}>
+        <Offers />
+      </div>
     </MobileShell>
   );
 };
