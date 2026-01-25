@@ -185,8 +185,16 @@ const Booking = () => {
         </p>
         <div className="mt-6 rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-left text-sm">
           <div className="flex items-center gap-3 border-b border-black/10 pb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black text-lg font-semibold text-white">
-              {selectedBarber?.name?.charAt(0)}
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-black text-lg font-semibold text-white">
+              {selectedBarber?.avatar?.url ? (
+                <img
+                  src={selectedBarber.avatar.url}
+                  alt={selectedBarber.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                selectedBarber?.name?.charAt(0)
+              )}
             </div>
             <div>
               <p className="font-medium text-black">{selectedBarber?.name}</p>

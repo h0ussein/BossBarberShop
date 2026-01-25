@@ -31,7 +31,11 @@ const ImageUpload = ({
 
   const onError = (err) => {
     console.error('Upload error:', err);
-    toast.error('Failed to upload image');
+    if (err.message?.includes('size') || err.message?.includes('large')) {
+      toast.error('Image size must be less than 5MB');
+    } else {
+      toast.error('Failed to upload image');
+    }
     setUploading(false);
   };
 
@@ -98,6 +102,7 @@ const ImageUpload = ({
           onSuccess={onSuccess}
           onUploadStart={onUploadStart}
           accept="image/*"
+          maxFileSize={5242880}
           style={{ display: 'none' }}
           ref={inputRefTest}
         />
