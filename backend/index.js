@@ -55,10 +55,15 @@ app.get('/api/health', (req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
+  console.error('Error stack:', err.stack);
+  console.error('Error message:', err.message);
+  console.error('Request URL:', req.url);
+  console.error('Request method:', req.method);
+  
+  res.status(err.status || 500).json({
     success: false,
-    message: 'Internal server error',
+    message: err.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
 

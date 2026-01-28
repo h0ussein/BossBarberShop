@@ -1,11 +1,25 @@
 import { Resend } from 'resend';
 
 // Check if Resend API key is configured
-if (!process.env.RESEND_API_KEY) {
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
+if (!RESEND_API_KEY) {
   console.error('⚠️  WARNING: RESEND_API_KEY is not set in environment variables');
+  console.error('⚠️  Email functionality will not work without a valid Resend API key');
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key exists, otherwise create a mock object
+let resend;
+if (RESEND_API_KEY) {
+  try {
+    resend = new Resend(RESEND_API_KEY);
+  } catch (error) {
+    console.error('⚠️  Failed to initialize Resend:', error.message);
+    resend = null;
+  }
+} else {
+  resend = null;
+}
 
 // Use custom FROM_EMAIL from .env or default to resend.dev for testing
 // For production, set FROM_EMAIL in .env to your verified domain email
@@ -25,6 +39,14 @@ if (process.env.NODE_ENV === 'development') {
  * Send verification email to user
  */
 export const sendVerificationEmail = async (email, name, verificationToken) => {
+  if (!resend) {
+    console.error('Cannot send email: Resend is not initialized. Check RESEND_API_KEY.');
+    return { 
+      success: false, 
+      error: { message: 'Email service not configured. Please contact support.' } 
+    };
+  }
+
   const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
   try {
@@ -118,6 +140,11 @@ export const sendVerificationEmail = async (email, name, verificationToken) => {
  * Send welcome email after verification
  */
 export const sendWelcomeEmail = async (email, name) => {
+  if (!resend) {
+    console.error('Cannot send email: Resend is not initialized.');
+    return { success: false, error: { message: 'Email service not configured' } };
+  }
+
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
@@ -194,6 +221,11 @@ export const sendWelcomeEmail = async (email, name) => {
  * Send booking notification to barber
  */
 export const sendBookingNotificationToBarber = async (barberEmail, barberName, bookingDetails) => {
+  if (!resend) {
+    console.error('Cannot send email: Resend is not initialized.');
+    return { success: false, error: { message: 'Email service not configured' } };
+  }
+
   const { customerName, customerPhone, serviceName, date, time, price } = bookingDetails;
   
   // Format date for display
@@ -320,6 +352,11 @@ export const sendBookingNotificationToBarber = async (barberEmail, barberName, b
  * Send booking confirmation to customer
  */
 export const sendBookingConfirmationToCustomer = async (customerEmail, customerName, bookingDetails) => {
+  if (!resend) {
+    console.error('Cannot send email: Resend is not initialized.');
+    return { success: false, error: { message: 'Email service not configured' } };
+  }
+
   const { barberName, serviceName, date, time, price } = bookingDetails;
   
   // Format date for display

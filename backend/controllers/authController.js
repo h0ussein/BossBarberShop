@@ -19,30 +19,22 @@ export const registerUser = async (req, res) => {
         const verificationToken = userExists.generateVerificationToken();
         await userExists.save();
 
-        // Send verification email
+        // Send verification email (don't fail registration if email fails)
         try {
           const emailResult = await sendVerificationEmail(email, userExists.name, verificationToken);
           
           if (!emailResult.success) {
             console.error('Failed to resend verification email:', emailResult.error);
-            return res.status(500).json({
-              success: false,
-              message: 'Failed to send verification email. Please try again later.',
-              requiresVerification: true,
-            });
+            // Still return success, user can use resend verification button
           }
         } catch (emailError) {
           console.error('Email sending error:', emailError);
-          return res.status(500).json({
-            success: false,
-            message: 'Failed to send verification email. Please try again later.',
-            requiresVerification: true,
-          });
+          // Still return success, user can use resend verification button
         }
 
         return res.status(200).json({
           success: true,
-          message: 'Verification email resent. Please check your inbox.',
+          message: 'Verification email sent. Please check your inbox. If you don\'t receive it, use the resend button.',
           requiresVerification: true,
         });
       }
