@@ -1,11 +1,25 @@
 import { Resend } from 'resend';
 
+// Check if Resend API key is configured
+if (!process.env.RESEND_API_KEY) {
+  console.error('⚠️  WARNING: RESEND_API_KEY is not set in environment variables');
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Use custom FROM_EMAIL from .env or default to resend.dev for testing
 // For production, set FROM_EMAIL in .env to your verified domain email
 // Example: FROM_EMAIL=BOSS Barbershop <noreply@yourdomain.com>
 const FROM_EMAIL = process.env.FROM_EMAIL || 'BOSS Barbershop <onboarding@resend.dev>';
+
+// Log email configuration (without sensitive data)
+if (process.env.NODE_ENV === 'development') {
+  console.log('📧 Email configuration:', {
+    from: FROM_EMAIL,
+    hasApiKey: !!process.env.RESEND_API_KEY,
+    frontendUrl: process.env.FRONTEND_URL,
+  });
+}
 
 /**
  * Send verification email to user

@@ -20,7 +20,25 @@ export const registerUser = async (req, res) => {
         await userExists.save();
 
         // Send verification email
-        await sendVerificationEmail(email, userExists.name, verificationToken);
+        try {
+          const emailResult = await sendVerificationEmail(email, userExists.name, verificationToken);
+          
+          if (!emailResult.success) {
+            console.error('Failed to resend verification email:', emailResult.error);
+            return res.status(500).json({
+              success: false,
+              message: 'Failed to send verification email. Please try again later.',
+              requiresVerification: true,
+            });
+          }
+        } catch (emailError) {
+          console.error('Email sending error:', emailError);
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to send verification email. Please try again later.',
+            requiresVerification: true,
+          });
+        }
 
         return res.status(200).json({
           success: true,
@@ -49,10 +67,17 @@ export const registerUser = async (req, res) => {
     await user.save();
 
     // Send verification email
-    const emailResult = await sendVerificationEmail(email, name, verificationToken);
+    try {
+      const emailResult = await sendVerificationEmail(email, name, verificationToken);
 
-    if (!emailResult.success) {
-      console.error('Failed to send verification email:', emailResult.error);
+      if (!emailResult.success) {
+        console.error('Failed to send verification email:', emailResult.error);
+        // Still return success but log the error
+        // User can use resend verification if email fails
+      }
+    } catch (emailError) {
+      console.error('Email sending error during registration:', emailError);
+      // Still allow registration to succeed, user can resend verification
     }
 
     res.status(201).json({
@@ -179,24 +204,36 @@ export const resendVerification = async (req, res) => {
     await user.save();
 
     // Send verification email
-    const emailResult = await sendVerificationEmail(email, user.name, verificationToken);
+    try {
+      const emailResult = await sendVerificationEmail(email, user.name, verificationToken);
 
-    if (!emailResult.success) {
+      if (!emailResult.success) {
+        console.error('Email sending failed:', emailResult.error);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to send verification email. Please check your email configuration or try again later.',
+          error: process.env.NODE_ENV === 'development' ? emailResult.error?.message : undefined,
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Verification email sent! Please check your inbox.',
+      });
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
       return res.status(500).json({
         success: false,
-        message: 'Failed to send verification email. Please try again.',
+        message: 'Failed to send verification email. Please try again later.',
+        error: process.env.NODE_ENV === 'development' ? emailError.message : undefined,
       });
     }
-
-    res.json({
-      success: true,
-      message: 'Verification email sent! Please check your inbox.',
-    });
   } catch (error) {
     console.error('Resend verification error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: error.message || 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 };
