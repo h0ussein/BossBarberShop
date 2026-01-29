@@ -193,44 +193,6 @@ export const deleteBooking = async (req, res) => {
   }
 };
 
-// @desc    Get available time slots
-// @route   GET /api/bookings/slots
-// @access  Public
-export const getAvailableSlots = async (req, res) => {
-  try {
-    const { date, barber, duration } = req.query;
-    
-    if (!date || !barber) {
-      return res.status(400).json({
-        success: false,
-        message: 'Date and barber are required',
-      });
-    }
-    
-    // Get existing bookings for that date and barber
-    const existingBookings = await Booking.find({
-      date,
-      barber,
-      status: { $ne: 'cancelled' },
-    }).populate('service', 'duration');
-    
-    // Return booked times
-    const bookedSlots = existingBookings.map((b) => ({
-      time: b.time,
-      duration: b.service?.duration || 30,
-    }));
-    
-    res.json({
-      success: true,
-      data: { bookedSlots },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
 
 // @desc    Get booking stats
 // @route   GET /api/bookings/stats
