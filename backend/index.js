@@ -4,7 +4,6 @@ import cors from 'cors';
 import path from 'path';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
 import conn from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
@@ -82,9 +81,6 @@ app.use('/api/barber-auth/login', authLimiter);
 
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
-
-// Sanitize user input - prevents NoSQL injection attacks
-app.use(mongoSanitize());
 
 // Routes
 app.use('/api/auth', authRoutes);

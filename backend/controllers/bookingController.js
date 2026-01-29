@@ -4,6 +4,27 @@ import Service from '../models/Service.js';
 import Settings from '../models/Settings.js';
 import { sendBookingNotificationToBarber, sendBookingConfirmationToCustomer } from '../utils/email.js';
 
+// Helper to sanitize input - removes MongoDB operators
+const sanitizeInput = (obj) => {
+  if (obj === null || typeof obj !== 'object') return obj;
+  
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    // Skip keys starting with $ (MongoDB operators)
+    if (key.startsWith('$')) continue;
+    // Skip keys containing dots (nested injection)
+    if (key.includes('.')) continue;
+    
+    // Recursively sanitize nested objects
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      sanitized[key] = sanitizeInput(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+};
+
 // @desc    Get all bookings
 // @route   GET /api/bookings
 // @access  Private/Admin
@@ -67,11 +88,25 @@ export const getBooking = async (req, res) => {
 // @access  Public
 export const createBooking = async (req, res) => {
   try {
+    // Extract and sanitize only expected fields (prevents NoSQL injection)
+    const { barber, service, date, time, customer, price } = req.body;
+    
+    // Validate required fields
+    if (!barber || !service || !date || !time || !customer) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields',
+      });
+    }
+    
+    // Sanitize customer data
+    const sanitizedCustomer = sanitizeInput(customer);
+    
     // Check for double bookings
     const existingBooking = await Booking.findOne({
-      barber: req.body.barber,
-      date: req.body.date,
-      time: req.body.time,
+      barber: String(barber),
+      date: String(date),
+      time: String(time),
       status: { $in: ['pending', 'confirmed'] }
     });
 
@@ -82,7 +117,20 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    const booking = await Booking.create(req.body);
+    // Create booking with sanitized data only
+    const booking = await Booking.create({
+      barber: String(barber),
+      service: String(service),
+      date: String(date),
+      time: String(time),
+      customer: {
+        name: String(sanitizedCustomer.name || ''),
+        phone: String(sanitizedCustomer.phone || ''),
+        email: sanitizedCustomer.email ? String(sanitizedCustomer.email) : undefined,
+      },
+      price: Number(price) || 0,
+      status: 'pending',
+    });
     
     const populatedBooking = await Booking.findById(booking._id)
       .populate('barber', 'name email')
