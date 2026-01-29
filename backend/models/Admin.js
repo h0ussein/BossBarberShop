@@ -9,10 +9,23 @@ const adminSchema = new mongoose.Schema(
       trim: true,
       default: 'Admin',
     },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      sparse: true, // Allow null/undefined, but must be unique if present
+      // Only required for barbers, not for super_admin
+    },
     passcode: {
       type: String,
-      required: [true, 'Passcode is required'],
+      // Only required for super_admin/admin, not for barbers
       minlength: [4, 'Passcode must be at least 4 characters'],
+      select: false,
+    },
+    password: {
+      type: String,
+      // Only required for barbers, not for super_admin
+      minlength: [6, 'Password must be at least 6 characters'],
       select: false,
     },
     role: {
@@ -36,15 +49,27 @@ const adminSchema = new mongoose.Schema(
   }
 );
 
-// Hash passcode before saving (Mongoose 8+ - no next() with async)
+// Hash passcode/password before saving (Mongoose 8+ - no next() with async)
 adminSchema.pre('save', async function () {
-  if (!this.isModified('passcode')) return;
-  this.passcode = await bcrypt.hash(this.passcode, 12);
+  // Hash passcode if modified (for super_admin)
+  if (this.isModified('passcode') && this.passcode) {
+    this.passcode = await bcrypt.hash(this.passcode, 12);
+  }
+  
+  // Hash password if modified (for barbers)
+  if (this.isModified('password') && this.password) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
 });
 
-// Compare passcode method
+// Compare passcode method (for super_admin)
 adminSchema.methods.comparePasscode = async function (candidatePasscode) {
   return await bcrypt.compare(candidatePasscode, this.passcode);
+};
+
+// Compare password method (for barbers)
+adminSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const Admin = mongoose.model('Admin', adminSchema);

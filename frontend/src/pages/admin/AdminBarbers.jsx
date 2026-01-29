@@ -55,9 +55,12 @@ const AdminBarbers = () => {
           await barbersAPI.updateAvatar(editingBarber._id, avatarData);
         }
         toast.success('Barber updated successfully');
+        await fetchBarbers(); // Refresh list before closing
         closeModal();
       } else {
         const res = await barbersAPI.create(formData);
+        // Refresh barbers list immediately
+        await fetchBarbers();
         toast.success('Barber added successfully');
         // Show login credentials
         if (res.data.credentials) {
@@ -68,7 +71,6 @@ const AdminBarbers = () => {
           closeModal();
         }
       }
-      fetchBarbers();
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -401,10 +403,12 @@ const AdminBarbers = () => {
                 Copy All
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   setShowCredentials(false);
                   setCredentials(null);
                   setFormData({ name: '', email: '', phone: '', role: 'Barber', password: '' });
+                  // Refresh list one more time when closing credentials modal
+                  await fetchBarbers();
                 }}
                 className="flex-1 rounded-xl bg-white py-2.5 text-sm font-medium text-black transition hover:bg-white/90"
               >
