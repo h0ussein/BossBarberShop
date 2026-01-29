@@ -8,6 +8,7 @@ import { BarberAuthProvider, useBarberAuth } from './contexts/BarberAuthContext'
 import MainApp from './MainApp';
 import Auth from './pages/Auth';
 import VerifyEmail from './pages/VerifyEmail';
+import ResetPassword from './pages/ResetPassword';
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
@@ -233,6 +234,7 @@ const App = () => {
               <Route path="/*" element={<MainApp />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* Admin Routes */}
               <Route path="/adminR/*" element={<AdminRoutes />} />

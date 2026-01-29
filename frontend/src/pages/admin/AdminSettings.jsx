@@ -12,12 +12,11 @@ const AdminSettings = () => {
     address: '',
     instagram: '',
   });
-  const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showAddAdmin, setShowAddAdmin] = useState(false);
-  const [newAdmin, setNewAdmin] = useState({ name: '', email: '', password: '', role: 'admin' });
-  const [addingAdmin, setAddingAdmin] = useState(false);
+  const [showPasscodeModal, setShowPasscodeModal] = useState(false);
+  const [passcodeData, setPasscodeData] = useState({ currentPasscode: '', newPasscode: '', confirmPasscode: '' });
+  const [updatingPasscode, setUpdatingPasscode] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -25,10 +24,7 @@ const AdminSettings = () => {
 
   const fetchData = async () => {
     try {
-      const [settingsRes, adminsRes] = await Promise.all([
-        settingsAPI.get(),
-        adminAPI.getAllAdmins().catch(() => ({ data: { admins: [] } })),
-      ]);
+      const settingsRes = await settingsAPI.get();
       
       const settings = settingsRes.data.settings;
       setShopInfo({
@@ -39,8 +35,6 @@ const AdminSettings = () => {
         address: settings.address || '',
         instagram: settings.instagram || '',
       });
-      
-      setAdmins(adminsRes.data.admins || []);
     } catch (error) {
       toast.error('Failed to load settings');
     } finally {
@@ -65,31 +59,37 @@ const AdminSettings = () => {
     }
   };
 
-  const handleAddAdmin = async (e) => {
+  const handlePasscodeChange = (e) => {
+    const { name, value } = e.target;
+    setPasscodeData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleUpdatePasscode = async (e) => {
     e.preventDefault();
-    setAddingAdmin(true);
+    
+    if (passcodeData.newPasscode !== passcodeData.confirmPasscode) {
+      toast.error('New passcode and confirmation do not match');
+      return;
+    }
+    
+    if (passcodeData.newPasscode.length < 4) {
+      toast.error('New passcode must be at least 4 characters');
+      return;
+    }
+    
+    setUpdatingPasscode(true);
     try {
-      await adminAPI.createAdmin(newAdmin);
-      toast.success('Admin added successfully');
-      setNewAdmin({ name: '', email: '', password: '', role: 'admin' });
-      setShowAddAdmin(false);
-      fetchData();
+      await adminAPI.updatePasscode({
+        currentPasscode: passcodeData.currentPasscode,
+        newPasscode: passcodeData.newPasscode,
+      });
+      toast.success('Admin passcode updated successfully');
+      setPasscodeData({ currentPasscode: '', newPasscode: '', confirmPasscode: '' });
+      setShowPasscodeModal(false);
     } catch (error) {
       toast.error(error.message);
     } finally {
-      setAddingAdmin(false);
-    }
-  };
-
-  const deleteAdmin = async (id) => {
-    if (confirm('Are you sure you want to remove this admin?')) {
-      try {
-        await adminAPI.deleteAdmin(id);
-        toast.success('Admin removed');
-        fetchData();
-      } catch (error) {
-        toast.error(error.message);
-      }
+      setUpdatingPasscode(false);
     }
   };
 
@@ -192,136 +192,102 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        {/* Admin Management */}
+        {/* Admin Security */}
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="text-sm font-medium text-white">Admin Users</h3>
-              <p className="text-xs text-white/50">Manage who can access the admin panel</p>
+              <h3 className="text-sm font-medium text-white">Admin Security</h3>
+              <p className="text-xs text-white/50">Manage admin passcode for secure access</p>
             </div>
             <button
-              onClick={() => setShowAddAdmin(true)}
+              onClick={() => setShowPasscodeModal(true)}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-xs font-medium text-black transition hover:bg-white/90"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
               </svg>
-              Add Admin
+              Change Passcode
             </button>
           </div>
 
-          <div className="mt-4 space-y-2">
-            {admins.map((admin) => (
-              <div
-                key={admin._id}
-                className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] p-3"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
-                    {admin.name?.charAt(0) || 'A'}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{admin.name}</p>
-                    <p className="text-xs text-white/50 truncate">{admin.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 ml-2">
-                  <span
-                    className={`hidden sm:inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      admin.role === 'super_admin'
-                        ? 'bg-purple-500/20 text-purple-400'
-                        : admin.role === 'admin'
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : 'bg-green-500/20 text-green-400'
-                    }`}
-                  >
-                    {admin.role?.replace('_', ' ')}
-                  </span>
-                  {admin.role !== 'super_admin' && (
-                    <button
-                      onClick={() => deleteAdmin(admin._id)}
-                      className="shrink-0 rounded-lg p-1.5 text-red-400 transition hover:bg-red-500/10"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
+          <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
               </div>
-            ))}
-            {admins.length === 0 && (
-              <p className="text-center text-xs text-white/50 py-4">No admins found</p>
-            )}
+              <div>
+                <p className="text-sm font-medium text-white">Admin Access Protected</p>
+                <p className="text-xs text-white/50">Current passcode: ••••••</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Add Admin Modal */}
-      {showAddAdmin && (
+      {/* Change Passcode Modal */}
+      {showPasscodeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900 p-5">
-            <h2 className="text-lg font-semibold text-white">Add New Admin</h2>
-            <form onSubmit={handleAddAdmin} className="mt-4 space-y-4">
+            <h2 className="text-lg font-semibold text-white">Change Admin Passcode</h2>
+            <p className="mt-1 text-xs text-white/50">Update the admin passcode for secure access</p>
+            <form onSubmit={handleUpdatePasscode} className="mt-4 space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/60">Name</label>
-                <input
-                  type="text"
-                  value={newAdmin.name}
-                  onChange={(e) => setNewAdmin((prev) => ({ ...prev, name: e.target.value }))}
-                  required
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/30"
-                  placeholder="Enter name"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/60">Email</label>
-                <input
-                  type="email"
-                  value={newAdmin.email}
-                  onChange={(e) => setNewAdmin((prev) => ({ ...prev, email: e.target.value }))}
-                  required
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/30"
-                  placeholder="admin@example.com"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/60">Password</label>
+                <label className="mb-1.5 block text-xs font-medium text-white/60">Current Passcode</label>
                 <input
                   type="password"
-                  value={newAdmin.password}
-                  onChange={(e) => setNewAdmin((prev) => ({ ...prev, password: e.target.value }))}
+                  name="currentPasscode"
+                  value={passcodeData.currentPasscode}
+                  onChange={handlePasscodeChange}
                   required
-                  minLength={6}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/30"
-                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/30 text-center tracking-wider"
+                  placeholder="••••••"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/60">Role</label>
-                <select
-                  value={newAdmin.role}
-                  onChange={(e) => setNewAdmin((prev) => ({ ...prev, role: e.target.value }))}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/30"
-                >
-                  <option value="admin" className="bg-zinc-900">Admin</option>
-                  <option value="barber" className="bg-zinc-900">Barber</option>
-                </select>
+                <label className="mb-1.5 block text-xs font-medium text-white/60">New Passcode</label>
+                <input
+                  type="password"
+                  name="newPasscode"
+                  value={passcodeData.newPasscode}
+                  onChange={handlePasscodeChange}
+                  required
+                  minLength={4}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/30 text-center tracking-wider"
+                  placeholder="••••••"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-white/60">Confirm New Passcode</label>
+                <input
+                  type="password"
+                  name="confirmPasscode"
+                  value={passcodeData.confirmPasscode}
+                  onChange={handlePasscodeChange}
+                  required
+                  minLength={4}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/30 text-center tracking-wider"
+                  placeholder="••••••"
+                />
               </div>
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowAddAdmin(false)}
+                  onClick={() => {
+                    setShowPasscodeModal(false);
+                    setPasscodeData({ currentPasscode: '', newPasscode: '', confirmPasscode: '' });
+                  }}
                   className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm font-medium text-white/70 transition hover:border-white/20"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={addingAdmin}
+                  disabled={updatingPasscode}
                   className="flex-1 rounded-xl bg-white py-2.5 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-50"
                 >
-                  {addingAdmin ? 'Adding...' : 'Add Admin'}
+                  {updatingPasscode ? 'Updating...' : 'Update Passcode'}
                 </button>
               </div>
             </form>

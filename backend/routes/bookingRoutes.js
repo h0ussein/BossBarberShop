@@ -14,7 +14,7 @@ const router = express.Router();
 
 // Public routes
 router.post('/', createBooking);
-router.get('/slots', getAvailableSlots);
+router.get('/available-slots/:barberId/:date', getAvailableSlots);
 
 // Admin routes
 router.get('/', protectAdmin, getBookings);

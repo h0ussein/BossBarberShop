@@ -1,20 +1,69 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../services/api';
+import toast from 'react-hot-toast';
 
 const Profile = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [appointments, setAppointments] = useState({
+    upcomingAppointments: [],
+    pastAppointments: [],
+  });
+  const [loading, setLoading] = useState(true);
 
-  // Demo data - will be fetched from API
-  const upcomingAppointments = [
-    { id: 1, barber: 'Ahmed', service: 'Classic Haircut', date: 'Jan 28, 2026', time: '2:00 PM', status: 'confirmed' },
-    { id: 2, barber: 'Omar', service: 'Beard Trim', date: 'Feb 4, 2026', time: '11:00 AM', status: 'pending' },
-  ];
+  // Fetch appointments when component mounts or user changes
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchAppointments();
+    }
+  }, [isAuthenticated, user]);
 
-  const pastAppointments = [
-    { id: 3, barber: 'Khalid', service: 'Hair + Beard Combo', date: 'Jan 15, 2026', time: '3:00 PM' },
-    { id: 4, barber: 'Ahmed', service: 'Classic Haircut', date: 'Dec 20, 2025', time: '1:00 PM' },
-  ];
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      
+      // Check if user has email
+      if (!user?.email) {
+        setAppointments({
+          upcomingAppointments: [],
+          pastAppointments: [],
+        });
+        return;
+      }
+
+      const response = await authAPI.getAppointments();
+      setAppointments({
+        upcomingAppointments: response.data.upcomingAppointments || [],
+        pastAppointments: response.data.pastAppointments || [],
+      });
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
+      if (error.message.includes('email not found')) {
+        toast.error('Please add an email to your profile to view appointments');
+      } else {
+        toast.error('Failed to load appointments');
+      }
+      setAppointments({
+        upcomingAppointments: [],
+        pastAppointments: [],
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short',
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
 
   if (!isAuthenticated) {
     return (
@@ -68,25 +117,58 @@ const Profile = () => {
 
       {/* Upcoming Appointments */}
       <section className="rounded-3xl border border-black/10 bg-white p-6 md:p-8">
-        <h3 className="text-[10px] uppercase tracking-[0.2em] text-black/50">Upcoming Appointments</h3>
-        {upcomingAppointments.length === 0 ? (
-          <p className="mt-4 text-sm text-black/50">No upcoming appointments.</p>
+        <div className="flex items-center justify-between">
+          <h3 className="text-[10px] uppercase tracking-[0.2em] text-black/50">Upcoming Appointments</h3>
+          {!loading && (
+            <button
+              onClick={fetchAppointments}
+              className="text-xs font-medium text-black/50 hover:text-black transition"
+              title="Refresh appointments"
+            >
+              ↻ Refresh
+            </button>
+          )}
+        </div>
+        {loading ? (
+          <div className="mt-4 flex items-center justify-center py-4">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+            <span className="ml-2 text-sm text-black/60">Loading appointments...</span>
+          </div>
+        ) : !user?.email ? (
+          <div className="mt-4 text-center">
+            <p className="text-sm text-black/50">Please add an email address to view your appointments.</p>
+            <p className="mt-1 text-xs text-black/40">
+              Appointments made without an email cannot be displayed here.
+            </p>
+          </div>
+        ) : appointments.upcomingAppointments.length === 0 ? (
+          <div className="mt-4 text-center">
+            <p className="text-sm text-black/50">No upcoming appointments.</p>
+            <button
+              onClick={() => navigate('/#booking')}
+              className="mt-2 text-sm font-medium text-black hover:underline"
+            >
+              Book your first appointment →
+            </button>
+          </div>
         ) : (
           <ul className="mt-4 space-y-3">
-            {upcomingAppointments.map((apt) => (
+            {appointments.upcomingAppointments.map((apt) => (
               <li
-                key={apt.id}
+                key={apt._id}
                 className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-black">{apt.service}</p>
-                    <p className="text-xs text-black/50">with {apt.barber}</p>
+                    <p className="font-medium text-black">{apt.service?.name || 'Service'}</p>
+                    <p className="text-xs text-black/50">with {apt.barber?.name || 'Barber'}</p>
                   </div>
                   <span
                     className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wide ${
                       apt.status === 'confirmed'
                         ? 'bg-black text-white'
+                        : apt.status === 'pending'
+                        ? 'border border-amber-300 bg-amber-50 text-amber-700'
                         : 'border border-black/20 text-black/60'
                     }`}
                   >
@@ -94,7 +176,7 @@ const Profile = () => {
                   </span>
                 </div>
                 <div className="mt-3 flex items-center gap-4 text-xs text-black/60">
-                  <span>{apt.date}</span>
+                  <span>{formatDate(apt.date)}</span>
                   <span>•</span>
                   <span>{apt.time}</span>
                 </div>
@@ -107,24 +189,43 @@ const Profile = () => {
       {/* Past Appointments */}
       <section className="rounded-3xl border border-black/10 bg-white p-6 md:p-8">
         <h3 className="text-[10px] uppercase tracking-[0.2em] text-black/50">Past Appointments</h3>
-        {pastAppointments.length === 0 ? (
+        {loading ? (
+          <div className="mt-4 flex items-center justify-center py-4">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+            <span className="ml-2 text-sm text-black/60">Loading appointments...</span>
+          </div>
+        ) : !user?.email ? (
+          <div className="mt-4 text-center">
+            <p className="text-sm text-black/50">Please add an email address to view your appointment history.</p>
+          </div>
+        ) : appointments.pastAppointments.length === 0 ? (
           <p className="mt-4 text-sm text-black/50">No past appointments.</p>
         ) : (
           <ul className="mt-4 space-y-3">
-            {pastAppointments.map((apt) => (
+            {appointments.pastAppointments.map((apt) => (
               <li
-                key={apt.id}
+                key={apt._id}
                 className="rounded-2xl border border-black/10 p-4"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-black/80">{apt.service}</p>
-                    <p className="text-xs text-black/50">with {apt.barber}</p>
+                    <p className="font-medium text-black/80">{apt.service?.name || 'Service'}</p>
+                    <p className="text-xs text-black/50">with {apt.barber?.name || 'Barber'}</p>
                   </div>
-                  <span className="text-xs text-black/40">Completed</span>
+                  <span
+                    className={`text-xs ${
+                      apt.status === 'completed'
+                        ? 'text-green-600'
+                        : apt.status === 'cancelled' 
+                        ? 'text-red-500'
+                        : 'text-black/40'
+                    } capitalize`}
+                  >
+                    {apt.status}
+                  </span>
                 </div>
                 <div className="mt-3 flex items-center gap-4 text-xs text-black/50">
-                  <span>{apt.date}</span>
+                  <span>{formatDate(apt.date)}</span>
                   <span>•</span>
                   <span>{apt.time}</span>
                 </div>

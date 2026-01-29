@@ -58,6 +58,7 @@ const navItems = [
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showVerificationSent, setShowVerificationSent] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
@@ -69,6 +70,7 @@ const Auth = () => {
     password: '',
     phone: '',
   });
+  const [forgotEmail, setForgotEmail] = useState('');
 
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -136,7 +138,105 @@ const Auth = () => {
     }
   };
 
-  // Show verification pending screen
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authAPI.forgotPassword(forgotEmail);
+      toast.success('If an account with this email exists, a password reset email has been sent.');
+      setShowForgotPassword(false);
+      setForgotEmail('');
+    } catch (error) {
+      toast.error(error.message || 'Failed to send reset email');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Show forgot password screen
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-white text-black">
+        <TopBar
+          onMenuClick={() => setDrawerOpen(true)}
+          onQuickBook={() => navigate('/')}
+          navItems={navItems}
+          activeTab="profile"
+          onTabChange={handleTabChange}
+        />
+        <SideDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          items={navItems}
+          onNavigate={handleTabChange}
+        />
+        <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-12 pb-28 lg:pb-8">
+          <div className="w-full max-w-md">
+            {/* Logo */}
+            <div className="mb-8 text-center">
+              <h1 className="text-2xl font-bold tracking-tight text-black">ABED MERHI</h1>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-black/50">Barbershop</p>
+            </div>
+
+            {/* Card */}
+            <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm md:p-8">
+              <h2 className="text-lg font-semibold text-black">Forgot Password</h2>
+              <p className="mt-1 text-sm text-black/60">
+                Enter your email address and we'll send you a reset link
+              </p>
+
+              <form onSubmit={handleForgotPassword} className="mt-6 space-y-4">
+                <div>
+                  <label className="mb-2 block text-xs font-medium text-black/60" htmlFor="forgotEmail">
+                    Email Address
+                  </label>
+                  <input
+                    id="forgotEmail"
+                    name="forgotEmail"
+                    type="email"
+                    required
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-black outline-none transition placeholder:text-black/40 focus:border-black/30"
+                    placeholder="john@example.com"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="mt-2 w-full rounded-full bg-black py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isLoading ? 'Sending...' : 'Send Reset Link'}
+                </button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotEmail('');
+                  }}
+                  className="text-sm text-black/60 transition hover:text-black"
+                >
+                  ← Back to Login
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <BottomNav items={navItems} activeTab="profile" onChange={handleTabChange} />
+      </div>
+    );
+  }
+
+  // Show verification pending screen  
   if (showVerificationSent) {
     return (
       <div className="min-h-screen bg-white text-black">
@@ -157,7 +257,7 @@ const Auth = () => {
         <div className="w-full max-w-md text-center">
           {/* Logo */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight text-black">BOSS</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-black">ABED MERHI</h1>
             <p className="text-[10px] uppercase tracking-[0.3em] text-black/50">Barbershop</p>
           </div>
 
@@ -226,7 +326,7 @@ const Auth = () => {
         <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-black">BOSS</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-black">ABED MERHI</h1>
           <p className="text-[10px] uppercase tracking-[0.3em] text-black/50">Barbershop</p>
         </div>
 
@@ -277,9 +377,20 @@ const Auth = () => {
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-medium text-black/60" htmlFor="password">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-medium text-black/60" htmlFor="password">
+                  Password
+                </label>
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-xs text-black/50 hover:text-black transition"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <input
                 id="password"
                 name="password"

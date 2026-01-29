@@ -50,7 +50,7 @@ const Contact = () => {
       <section className="rounded-3xl border border-black/10 bg-white p-6 md:p-8">
         <h3 className="text-[10px] uppercase tracking-[0.2em] text-black/50">Location</h3>
         <div className="mt-4 text-sm text-black/70">
-          <p className="font-semibold text-black">{settings?.shopName || 'BOSS Barbershop'}</p>
+          <p className="font-semibold text-black">{settings?.shopName || 'Salon Abed'}</p>
           <p className="mt-1">{settings?.address || '123 Main Street, Downtown, City 12345'}</p>
         </div>
         <div className="mt-4 flex h-40 items-center justify-center rounded-2xl border border-black/10 bg-black/[0.02] text-xs text-black/40">
@@ -71,13 +71,13 @@ const Contact = () => {
           <li className="flex items-center justify-between border-b border-black/10 pb-4">
             <span className="text-black/60">Email</span>
             <a href={`mailto:${settings?.email}`} className="font-medium text-black transition hover:underline">
-              {settings?.email || 'hello@bossbarbershop.com'}
+              {settings?.email || 'hello@salonabed.com'}
             </a>
           </li>
           <li className="flex items-center justify-between">
             <span className="text-black/60">Instagram</span>
             <a href="https://instagram.com" target="_blank" rel="noreferrer" className="font-medium text-black transition hover:underline">
-              {settings?.instagram || '@bossbarbershop'}
+              {settings?.instagram || '@salonabed'}
             </a>
           </li>
         </ul>

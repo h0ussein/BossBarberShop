@@ -31,7 +31,7 @@ const BarberLogin = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-white">BOSS</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">ABED MERHI</h1>
           <p className="mt-1 text-xs uppercase tracking-[0.2em] text-white/50">
             Barber Portal
           </p>

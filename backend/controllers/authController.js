@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import User from '../models/User.js';
+import Booking from '../models/Booking.js';
 import { generateToken } from '../utils/generateToken.js';
-import { sendVerificationEmail, sendWelcomeEmail } from '../utils/email.js';
+import { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail } from '../utils/email.js';
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -369,6 +370,258 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error',
+    });
+  }
+};
+
+// @desc    Forgot password
+// @route   POST /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required',
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // Don't reveal whether user exists or not for security
+      return res.json({
+        success: true,
+        message: 'If an account with this email exists, a password reset email has been sent.',
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: 'Account is deactivated',
+      });
+    }
+
+    // Generate password reset token
+    const resetToken = user.generatePasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    // Send password reset email
+    try {
+      const emailResult = await sendPasswordResetEmail(email, user.name, resetToken);
+
+      if (!emailResult.success) {
+        // Clear the reset token if email fails
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save({ validateBeforeSave: false });
+        
+        console.error('Password reset email failed:', emailResult.error);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to send reset email. Please try again later.',
+          error: process.env.NODE_ENV === 'development' ? emailResult.error?.message : undefined,
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'If an account with this email exists, a password reset email has been sent.',
+      });
+    } catch (emailError) {
+      // Clear the reset token if email fails
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      
+      console.error('Password reset email error:', emailError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send reset email. Please try again later.',
+        error: process.env.NODE_ENV === 'development' ? emailError.message : undefined,
+      });
+    }
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error',
+    });
+  }
+};
+
+// @desc    Reset password
+// @route   POST /api/auth/reset-password
+// @access  Public
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and password are required',
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters',
+      });
+    }
+
+    // Hash the token to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with this token and check if not expired
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    }).select('+passwordResetToken +passwordResetExpires');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token',
+      });
+    }
+
+    // Set new password (will be hashed by the pre-save middleware)
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    // Generate auth token
+    const authToken = generateToken(user._id, 'user');
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully!',
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          isEmailVerified: user.isEmailVerified,
+        },
+        token: authToken,
+      },
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error during password reset',
+    });
+  }
+};
+
+// @desc    Get user appointments
+// @route   GET /api/auth/appointments
+// @access  Private
+export const getUserAppointments = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (!user || !user.email) {
+      return res.status(400).json({
+        success: false,
+        message: 'User email not found',
+      });
+    }
+
+    // Find all bookings for this user's email
+    const bookings = await Booking.find({
+      'customer.email': user.email,
+    })
+      .populate('barber', 'name')
+      .populate('service', 'name duration')
+      .sort({ date: -1, time: -1 }); // Most recent first
+
+    // Separate upcoming and past appointments based on current date
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    const upcomingAppointments = [];
+    const pastAppointments = [];
+
+    bookings.forEach(booking => {
+      // Parse booking date
+      const bookingDate = new Date(booking.date);
+      const bookingDateStr = booking.date;
+
+      // If booking is today or in the future, it's upcoming
+      if (bookingDateStr >= todayStr) {
+        // For today's appointments, also check if time has passed
+        if (bookingDateStr === todayStr) {
+          // Parse time and check if it's still upcoming
+          const [timeStr, period] = booking.time.split(' ');
+          const [hours, minutes] = timeStr.split(':').map(Number);
+          let bookingHours = hours;
+          
+          if (period === 'PM' && hours !== 12) {
+            bookingHours += 12;
+          } else if (period === 'AM' && hours === 12) {
+            bookingHours = 0;
+          }
+          
+          const bookingTime = new Date();
+          bookingTime.setHours(bookingHours, minutes, 0, 0);
+          
+          if (bookingTime > today) {
+            upcomingAppointments.push(booking);
+          } else {
+            pastAppointments.push(booking);
+          }
+        } else {
+          upcomingAppointments.push(booking);
+        }
+      } else {
+        pastAppointments.push(booking);
+      }
+    });
+
+    // Sort upcoming appointments by date/time (earliest first)
+    upcomingAppointments.sort((a, b) => {
+      if (a.date !== b.date) {
+        return new Date(a.date) - new Date(b.date);
+      }
+      // Same date, sort by time
+      return a.time.localeCompare(b.time);
+    });
+
+    // Sort past appointments by date/time (most recent first)
+    pastAppointments.sort((a, b) => {
+      if (a.date !== b.date) {
+        return new Date(b.date) - new Date(a.date);
+      }
+      // Same date, sort by time (most recent first)
+      return b.time.localeCompare(a.time);
+    });
+
+    res.json({
+      success: true,
+      data: {
+        upcomingAppointments,
+        pastAppointments,
+        totalBookings: bookings.length,
+      },
+    });
+
+  } catch (error) {
+    console.error('Get user appointments error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error',
     });
   }
 };

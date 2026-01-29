@@ -21,6 +21,8 @@ const Booking = () => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   useEffect(() => {
     // Only fetch if we haven't fetched before
@@ -37,6 +39,15 @@ const Booking = () => {
       setBarberSchedule(null);
     }
   }, [formData.barber]);
+
+  // Fetch available slots when barber and date are selected
+  useEffect(() => {
+    if (formData.barber && formData.date) {
+      fetchAvailableSlots(formData.barber, formData.date);
+    } else {
+      setAvailableSlots([]);
+    }
+  }, [formData.barber, formData.date]);
 
   const fetchData = async () => {
     if (hasFetched) return; // Prevent duplicate fetches
@@ -67,63 +78,43 @@ const Booking = () => {
     }
   };
 
-  const selectedService = services.find((s) => s._id === formData.service);
-  const selectedBarber = barbers.find((b) => b._id === formData.barber);
-
-  // Generate time slots based on barber's working hours
-  const generateTimeSlots = () => {
-    if (!formData.date || !formData.barber) return [];
-    
-    const dayOfWeek = new Date(formData.date).toLocaleDateString('en-US', { weekday: 'long' });
-    
-    // Check if barber has a day off on this date
-    if (barberSchedule?.daysOff?.some(d => d.date === formData.date)) {
-      return [];
+  const fetchAvailableSlots = async (barberId, date) => {
+    setSlotsLoading(true);
+    try {
+      const res = await bookingsAPI.getAvailableSlots(barberId, date);
+      setAvailableSlots(res.data.availableSlots);
+    } catch (error) {
+      console.error('Failed to load available slots:', error);
+      toast.error('Failed to load available time slots');
+      setAvailableSlots([]);
+    } finally {
+      setSlotsLoading(false);
     }
-    
-    // Use barber's schedule if available, otherwise fall back to shop hours
-    let daySettings;
-    if (barberSchedule?.workingHours?.length > 0) {
-      daySettings = barberSchedule.workingHours.find((d) => d.day === dayOfWeek);
-      if (!daySettings || !daySettings.isWorking) return [];
-    } else if (settings?.workingHours) {
-      daySettings = settings.workingHours.find((d) => d.day === dayOfWeek);
-      if (!daySettings || !daySettings.isOpen) return [];
-    } else {
-      return [];
-    }
-    
-    const slots = [];
-    const startTime = daySettings.startTime || daySettings.openTime;
-    const endTime = daySettings.endTime || daySettings.closeTime;
-    const [openHour, openMin] = startTime.split(':').map(Number);
-    const [closeHour] = endTime.split(':').map(Number);
-    
-    // Break time handling
-    const breakStart = barberSchedule?.breakTime?.enabled ? barberSchedule.breakTime.startTime : null;
-    const breakEnd = barberSchedule?.breakTime?.enabled ? barberSchedule.breakTime.endTime : null;
-    
-    for (let hour = openHour; hour < closeHour; hour++) {
-      for (let min = 0; min < 60; min += 30) {
-        // Skip if before opening time
-        if (hour === openHour && min < openMin) continue;
-        
-        const timeStr = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
-        
-        // Skip break time
-        if (breakStart && breakEnd) {
-          if (timeStr >= breakStart && timeStr < breakEnd) continue;
-        }
-        
-        const h = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-        const period = hour >= 12 ? 'PM' : 'AM';
-        slots.push(`${h}:${min.toString().padStart(2, '0')} ${period}`);
-      }
-    }
-    return slots;
   };
 
-  const timeSlots = generateTimeSlots();
+  // Get available dates (today and tomorrow only)
+  const getAvailableDates = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    return [
+      {
+        value: today.toISOString().split('T')[0],
+        label: 'Today',
+        date: today
+      },
+      {
+        value: tomorrow.toISOString().split('T')[0],
+        label: 'Tomorrow',
+        date: tomorrow
+      }
+    ];
+  };
+
+  const selectedService = services.find((s) => s._id === formData.service);
+  const selectedBarber = barbers.find((b) => b._id === formData.barber);
+  const availableDates = getAvailableDates();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -150,7 +141,13 @@ const Booking = () => {
       setSubmitted(true);
       toast.success('Booking confirmed!');
     } catch (error) {
-      toast.error(error.message || 'Failed to create booking');
+      if (error.message.includes('already been booked')) {
+        // Refresh available slots if slot was taken
+        fetchAvailableSlots(formData.barber, formData.date);
+        toast.error('This time slot was just taken by someone else. Please select another time.');
+      } else {
+        toast.error(error.message || 'Failed to create booking');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -230,6 +227,7 @@ const Booking = () => {
             setSubmitted(false);
             setStep(1);
             setFormData({ barber: '', service: '', date: '', time: '', name: '', phone: '', email: '' });
+            setAvailableSlots([]);
           }}
           className="mt-6 w-full rounded-full border border-black/20 py-3 text-sm font-semibold uppercase tracking-wide text-black transition hover:border-black/40 hover:bg-black/5"
         >
@@ -402,31 +400,53 @@ const Booking = () => {
             
             <div className="mt-6">
               <label className="mb-2 block text-xs font-medium text-black/60">Select Date</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-black outline-none transition focus:border-black/30"
-              />
+              <div className="grid grid-cols-2 gap-3">
+                {availableDates.map((dateOption) => (
+                  <button
+                    key={dateOption.value}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, date: dateOption.value, time: '' }))}
+                    className={`rounded-xl border p-4 text-left transition ${
+                      formData.date === dateOption.value
+                        ? 'border-black bg-black/[0.02]'
+                        : 'border-black/10 hover:border-black/20'
+                    }`}
+                  >
+                    <div className={`font-medium ${formData.date === dateOption.value ? 'text-black' : 'text-black/70'}`}>
+                      {dateOption.label}
+                    </div>
+                    <div className={`text-xs mt-1 ${formData.date === dateOption.value ? 'text-black/60' : 'text-black/50'}`}>
+                      {dateOption.date.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {formData.date && timeSlots.length === 0 && (
+            {formData.date && slotsLoading && (
+              <div className="mt-6 flex items-center justify-center py-4">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+                <span className="ml-2 text-sm text-black/60">Loading available slots...</span>
+              </div>
+            )}
+
+            {formData.date && !slotsLoading && availableSlots.length === 0 && (
               <p className="mt-4 text-sm text-red-500">
-                {barberSchedule?.daysOff?.some(d => d.date === formData.date)
-                  ? `${selectedBarber?.name} is not available on this day. Please select another date.`
-                  : `${selectedBarber?.name || 'Barber'} is not working on this day. Please select another date.`}
+                {`${selectedBarber?.name} has no available slots on this day. Please try another date or time later.`}
               </p>
             )}
 
-            {formData.date && timeSlots.length > 0 && (
+            {formData.date && !slotsLoading && availableSlots.length > 0 && (
               <div className="mt-6">
                 <label className="mb-2 block text-xs font-medium text-black/60">
-                  Available Slots
+                  Available Slots ({availableSlots.length} slots)
                 </label>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                  {timeSlots.map((slot) => (
+                  {availableSlots.map((slot) => (
                     <button
                       key={slot}
                       type="button"
@@ -480,7 +500,12 @@ const Booking = () => {
               </div>
               <div className="mt-2 flex items-center justify-between">
                 <span className="text-black/60">Date & Time</span>
-                <span className="font-medium text-black">{formData.date} at {formData.time}</span>
+                <span className="font-medium text-black">
+                  {formData.date === new Date().toISOString().split('T')[0] 
+                    ? 'Today' 
+                    : 'Tomorrow'
+                  } at {formData.time}
+                </span>
               </div>
               <div className="mt-2 flex items-center justify-between border-t border-black/10 pt-2">
                 <span className="font-medium text-black">Total</span>

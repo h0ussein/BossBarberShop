@@ -1,6 +1,6 @@
-# BOSS Barbershop
+# Salon Abed
 
-A modern booking and management platform for **BOSS Barbershop**.
+A modern booking and management platform for **Abed Merhi Barbershop**.
 
 Customers can browse services, view shop information, and book an appointment through a simple step-by-step flow (choose a barber ? choose a service ? pick date/time ? enter details).
 

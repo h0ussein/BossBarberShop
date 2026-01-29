@@ -48,7 +48,7 @@ const Home = ({ onBook }) => {
       {/* Hero Section */}
       <section className="rounded-3xl border border-black/10 bg-black p-6 text-white md:p-8">
         <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">
-          {settings?.shopName || 'BOSS Barbershop'}
+          {settings?.shopName || 'Salon Abed'}
         </p>
         <h2 className="mt-3 text-2xl font-semibold text-white md:text-3xl">
           Sharp cuts. Clean style.
@@ -91,7 +91,7 @@ const Home = ({ onBook }) => {
       <section className="rounded-3xl border border-black/10 bg-white p-6 md:p-8">
         <h3 className="text-[10px] uppercase tracking-[0.2em] text-black/50">About Us</h3>
         <p className="mt-4 text-sm leading-relaxed text-black/70 md:text-base">
-          {settings?.shopName || 'BOSS Barbershop'} delivers premium grooming experiences with expert barbers
+          {settings?.shopName || 'Salon Abed'} delivers premium grooming experiences with expert barbers
           who take pride in their craft. Our skilled team is dedicated to
           making you look and feel your best.
         </p>

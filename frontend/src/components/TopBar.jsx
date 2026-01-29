@@ -18,7 +18,7 @@ const TopBar = ({ onMenuClick, onQuickBook, navItems, activeTab, onTabChange }) 
 
         {/* Logo */}
         <div className="text-center lg:text-left">
-          <h1 className="text-lg font-bold tracking-tight text-black">BOSS</h1>
+          <h1 className="text-lg font-bold tracking-tight text-black">ABED MERHI</h1>
           <p className="text-[10px] uppercase tracking-[0.2em] text-black/50">Barbershop</p>
         </div>
 

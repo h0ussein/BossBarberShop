@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Brand */}
           <div>
-            <h3 className="mb-2 text-lg font-bold tracking-tight text-black">BOSS</h3>
+            <h3 className="mb-2 text-lg font-bold tracking-tight text-black">ABED MERHI</h3>
             <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-black/50">Barbershop</p>
             <p className="text-sm text-black/60">
               Premium grooming experiences with expert barbers who take pride in their craft.
@@ -54,7 +54,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="mt-8 border-t border-black/10 pt-6 text-center">
           <p className="text-xs text-black/50">
-            © {currentYear} BOSS Barbershop. All rights reserved.
+            © {currentYear} Salon Abed. All rights reserved.
           </p>
         </div>
       </div>

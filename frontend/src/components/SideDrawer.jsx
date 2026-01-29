@@ -19,7 +19,7 @@ const SideDrawer = ({ open, onClose, items, onNavigate }) => {
       >
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold tracking-tight text-black">BOSS</h2>
+            <h2 className="text-lg font-bold tracking-tight text-black">ABED MERHI</h2>
             <p className="text-[10px] uppercase tracking-[0.2em] text-black/50">Barbershop</p>
           </div>
           <button

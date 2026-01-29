@@ -23,8 +23,8 @@ if (RESEND_API_KEY) {
 
 // Use custom FROM_EMAIL from .env or default to resend.dev for testing
 // For production, set FROM_EMAIL in .env to your verified domain email
-// Example: FROM_EMAIL=BOSS Barbershop <noreply@yourdomain.com>
-const FROM_EMAIL = process.env.FROM_EMAIL || 'BOSS Barbershop <onboarding@resend.dev>';
+// Example: FROM_EMAIL=Abed Merhi Barbershop <noreply@yourdomain.com>
+const FROM_EMAIL = process.env.FROM_EMAIL;
 
 // Log email configuration (without sensitive data)
 if (process.env.NODE_ENV === 'development') {
@@ -53,7 +53,7 @@ export const sendVerificationEmail = async (email, name, verificationToken) => {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
-      subject: 'Verify your email - BOSS Barbershop',
+      subject: 'Verify your email - Abed Merhi Barbershop',
       html: `
         <!DOCTYPE html>
         <html>
@@ -69,7 +69,7 @@ export const sendVerificationEmail = async (email, name, verificationToken) => {
                   <!-- Header -->
                   <tr>
                     <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">BOSS</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">ABED MERHI</h1>
                       <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
                     </td>
                   </tr>
@@ -149,7 +149,7 @@ export const sendWelcomeEmail = async (email, name) => {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
-      subject: 'Welcome to BOSS Barbershop!',
+      subject: 'Welcome to Salon Abed!',
       html: `
         <!DOCTYPE html>
         <html>
@@ -165,7 +165,7 @@ export const sendWelcomeEmail = async (email, name) => {
                   <!-- Header -->
                   <tr>
                     <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">BOSS</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">ABED MERHI</h1>
                       <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
                     </td>
                   </tr>
@@ -192,7 +192,7 @@ export const sendWelcomeEmail = async (email, name) => {
                   <tr>
                     <td style="background-color: #fafafa; padding: 25px 40px; text-align: center; border-top: 1px solid #eeeeee;">
                       <p style="margin: 0; color: #999999; font-size: 12px;">
-                        Thank you for choosing BOSS Barbershop!
+                        Thank you for choosing Salon Abed!
                       </p>
                     </td>
                   </tr>
@@ -213,6 +213,107 @@ export const sendWelcomeEmail = async (email, name) => {
     return { success: true, data };
   } catch (error) {
     console.error('Error sending welcome email:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Send password reset email to user
+ */
+export const sendPasswordResetEmail = async (email, name, resetToken) => {
+  if (!resend) {
+    console.error('Cannot send email: Resend is not initialized. Check RESEND_API_KEY.');
+    return { 
+      success: false, 
+      error: { message: 'Email service not configured. Please contact support.' } 
+    };
+  }
+
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: 'Reset your password - Salon Abed',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="100%" style="max-width: 500px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                  <!-- Header -->
+                  <tr>
+                    <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">ABED MERHI</h1>
+                      <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px;">
+                      <h2 style="margin: 0 0 10px; color: #000000; font-size: 22px; font-weight: 600;">Reset Your Password</h2>
+                      <p style="margin: 0 0 25px; color: #666666; font-size: 15px; line-height: 1.6;">
+                        Hi ${name}, you've requested to reset your password. Click the button below to create a new password.
+                      </p>
+                      
+                      <!-- Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td align="center" style="padding: 10px 0 25px;">
+                            <a href="${resetUrl}" style="display: inline-block; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 35px; border-radius: 10px;">
+                              Reset Password
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <p style="margin: 0 0 15px; color: #999999; font-size: 13px; line-height: 1.5;">
+                        Or copy and paste this link into your browser:
+                      </p>
+                      <p style="margin: 0 0 25px; color: #666666; font-size: 12px; word-break: break-all; background-color: #f5f5f5; padding: 12px; border-radius: 8px;">
+                        ${resetUrl}
+                      </p>
+                      
+                      <p style="margin: 0; color: #999999; font-size: 13px;">
+                        This link will expire in 10 minutes. If you didn't request this, please ignore this email.
+                      </p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #fafafa; padding: 25px 40px; text-align: center; border-top: 1px solid #eeeeee;">
+                      <p style="margin: 0; color: #999999; font-size: 12px;">
+                        This is an automated message from Salon Abed.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send password reset email:', error);
+      return { success: false, error };
+    }
+
+    console.log('Password reset email sent:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
     return { success: false, error };
   }
 };
@@ -256,7 +357,7 @@ export const sendBookingNotificationToBarber = async (barberEmail, barberName, b
                   <!-- Header -->
                   <tr>
                     <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">BOSS</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">ABED MERHI</h1>
                       <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
                     </td>
                   </tr>
@@ -322,7 +423,7 @@ export const sendBookingNotificationToBarber = async (barberEmail, barberName, b
                   <tr>
                     <td style="background-color: #fafafa; padding: 25px 40px; text-align: center; border-top: 1px solid #eeeeee;">
                       <p style="margin: 0; color: #999999; font-size: 12px;">
-                        This is an automated notification from BOSS Barbershop.
+                        This is an automated notification from Salon Abed.
                       </p>
                     </td>
                   </tr>
@@ -387,7 +488,7 @@ export const sendBookingConfirmationToCustomer = async (customerEmail, customerN
                   <!-- Header -->
                   <tr>
                     <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">BOSS</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">ABED MERHI</h1>
                       <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
                     </td>
                   </tr>
@@ -523,7 +624,7 @@ export const sendAppointmentConfirmationToCustomer = async (customerEmail, custo
                   <!-- Header -->
                   <tr>
                     <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">BOSS</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">ABED MERHI</h1>
                       <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
                     </td>
                   </tr>
@@ -659,7 +760,7 @@ export const sendAppointmentCompletionToCustomer = async (customerEmail, custome
                   <!-- Header -->
                   <tr>
                     <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">BOSS</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">ABED MERHI</h1>
                       <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
                     </td>
                   </tr>
@@ -730,7 +831,7 @@ export const sendAppointmentCompletionToCustomer = async (customerEmail, custome
                   <tr>
                     <td style="background-color: #fafafa; padding: 25px 40px; text-align: center; border-top: 1px solid #eeeeee;">
                       <p style="margin: 0; color: #999999; font-size: 12px;">
-                        Thank you for choosing BOSS Barbershop! We look forward to seeing you again.
+                        Thank you for choosing Salon Abed! We look forward to seeing you again.
                       </p>
                     </td>
                   </tr>

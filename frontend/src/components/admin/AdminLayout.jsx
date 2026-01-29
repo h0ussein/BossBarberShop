@@ -109,7 +109,7 @@ const AdminLayout = ({ children }) => {
         {/* Logo */}
         <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">BOSS</h1>
+            <h1 className="text-xl font-bold tracking-tight text-white">ABED MERHI</h1>
             <p className="text-[9px] uppercase tracking-[0.2em] text-white/50">Admin Panel</p>
           </div>
           <button

@@ -6,6 +6,7 @@ import {
   getAllAdmins,
   updateAdmin,
   deleteAdmin,
+  updatePasscode,
 } from '../controllers/adminAuthController.js';
 import { protectAdmin, superAdminOnly } from '../middleware/authMiddleware.js';
 
@@ -16,6 +17,7 @@ router.post('/login', loginAdmin);
 
 // Protected admin routes
 router.get('/profile', protectAdmin, getAdminProfile);
+router.put('/passcode', protectAdmin, updatePasscode);
 
 // Super admin only routes
 router.post('/create', protectAdmin, superAdminOnly, createAdmin);

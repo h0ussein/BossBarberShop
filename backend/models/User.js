@@ -45,6 +45,15 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    // Password reset fields
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -74,6 +83,23 @@ userSchema.methods.generateVerificationToken = function () {
   
   // Set expiration to 24 hours
   this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+  
+  // Return the unhashed token (this is what we send in the email)
+  return token;
+};
+
+// Generate password reset token
+userSchema.methods.generatePasswordResetToken = function () {
+  const token = crypto.randomBytes(32).toString('hex');
+  
+  // Hash the token and save to database
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  
+  // Set expiration to 10 minutes
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   
   // Return the unhashed token (this is what we send in the email)
   return token;

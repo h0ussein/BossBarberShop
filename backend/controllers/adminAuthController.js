@@ -6,23 +6,23 @@ import { generateToken } from '../utils/generateToken.js';
 // @access  Public
 export const loginAdmin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { passcode } = req.body;
 
-    // Check if email and password provided
-    if (!email || !password) {
+    // Check if passcode provided
+    if (!passcode) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password',
+        message: 'Please provide passcode',
       });
     }
 
-    // Find admin and include password for comparison
-    const admin = await Admin.findOne({ email }).select('+password');
+    // Find the admin (there should be only one admin record)
+    const admin = await Admin.findOne({}).select('+passcode');
 
     if (!admin) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Admin not found. Please contact system administrator.',
       });
     }
 
@@ -30,17 +30,17 @@ export const loginAdmin = async (req, res) => {
     if (!admin.isActive) {
       return res.status(401).json({
         success: false,
-        message: 'Your account has been deactivated',
+        message: 'Admin account has been deactivated',
       });
     }
 
-    // Check password
-    const isMatch = await admin.comparePassword(password);
+    // Check passcode
+    const isMatch = await admin.comparePasscode(passcode);
 
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Invalid passcode',
       });
     }
 
@@ -53,7 +53,6 @@ export const loginAdmin = async (req, res) => {
         admin: {
           id: admin._id,
           name: admin.name,
-          email: admin.email,
           role: admin.role,
         },
         token,
@@ -81,7 +80,6 @@ export const getAdminProfile = async (req, res) => {
         admin: {
           id: admin._id,
           name: admin.name,
-          email: admin.email,
           role: admin.role,
           createdAt: admin.createdAt,
         },
@@ -92,6 +90,66 @@ export const getAdminProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error',
+    });
+  }
+};
+
+// @desc    Update admin passcode
+// @route   PUT /api/admin/passcode
+// @access  Private/Admin
+export const updatePasscode = async (req, res) => {
+  try {
+    const { currentPasscode, newPasscode } = req.body;
+
+    // Validate input
+    if (!currentPasscode || !newPasscode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both current and new passcode are required',
+      });
+    }
+
+    if (newPasscode.length < 4) {
+      return res.status(400).json({
+        success: false,
+        message: 'New passcode must be at least 4 characters',
+      });
+    }
+
+    // Find admin with current passcode
+    const admin = await Admin.findById(req.admin._id).select('+passcode');
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin not found',
+      });
+    }
+
+    // Verify current passcode
+    const isCurrentMatch = await admin.comparePasscode(currentPasscode);
+
+    if (!isCurrentMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current passcode is incorrect',
+      });
+    }
+
+    // Update passcode
+    admin.passcode = newPasscode;
+    await admin.save();
+
+    res.json({
+      success: true,
+      message: 'Passcode updated successfully',
+    });
+
+  } catch (error) {
+    console.error('Update passcode error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error',
     });
   }
 };

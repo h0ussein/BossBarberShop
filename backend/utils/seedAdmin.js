@@ -2,24 +2,23 @@ import Admin from '../models/Admin.js';
 
 export const seedDefaultAdmin = async () => {
   try {
-    // Check if the default admin exists
-    const existingAdmin = await Admin.findOne({ email: 'admin@gmail.com' });
+    // Check if any admin exists (since we now use passcode system)
+    const existingAdmin = await Admin.findOne({});
 
     if (!existingAdmin) {
-      // Create default super admin
+      // Create default admin with passcode
       const defaultAdmin = await Admin.create({
         name: 'Admin',
-        email: 'admin@gmail.com',
-        password: 'admin123',
+        passcode: '301103',
         role: 'super_admin',
       });
 
       console.log('✓ Default admin created:');
-      console.log('  Email: admin@gmail.com');
-      console.log('  Password: admin123');
+      console.log('  Name: Admin');
+      console.log('  Passcode: 301103');
       console.log('  Role: super_admin');
     } else {
-      console.log('✓ Default admin already exists (admin@gmail.com)');
+      console.log('✓ Admin already exists');
     }
 
     // Log total admin count

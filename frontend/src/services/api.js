@@ -75,6 +75,18 @@ export const authAPI = {
       body: JSON.stringify({ email }),
     }),
 
+  forgotPassword: (email) =>
+    apiCall('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+
+  resetPassword: (token, password) =>
+    apiCall('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    }),
+
   getProfile: () => userApiCall('/auth/profile'),
 
   updateProfile: (data) =>
@@ -82,6 +94,8 @@ export const authAPI = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+
+  getAppointments: () => userApiCall('/auth/appointments'),
 };
 
 // Admin Auth API
@@ -111,6 +125,12 @@ export const adminAPI = {
   deleteAdmin: (id) =>
     adminApiCall(`/admin/${id}`, {
       method: 'DELETE',
+    }),
+
+  updatePasscode: (data) =>
+    adminApiCall('/admin/passcode', {
+      method: 'PUT',
+      body: JSON.stringify(data),
     }),
 };
 
@@ -202,8 +222,8 @@ export const bookingsAPI = {
       body: JSON.stringify(data),
     }),
   
-  getAvailableSlots: (date, barberId) =>
-    apiCall(`/bookings/slots?date=${date}&barber=${barberId}`),
+  getAvailableSlots: (barberId, date) =>
+    apiCall(`/bookings/available-slots/${barberId}/${date}`),
   
   // Admin-protected endpoints
   getAll: (filters = {}) => {

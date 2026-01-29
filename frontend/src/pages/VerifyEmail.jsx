@@ -50,7 +50,7 @@ const VerifyEmail = () => {
       <div className="w-full max-w-md text-center">
         {/* Logo */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-black">BOSS</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-black">ABED MERHI</h1>
           <p className="mt-1 text-xs uppercase tracking-[0.2em] text-black/50">
             BARBERSHOP
           </p>
