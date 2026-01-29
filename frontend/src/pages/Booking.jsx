@@ -86,23 +86,15 @@ const Booking = () => {
     }
   };
 
-  // Get available dates (today and tomorrow only)
+  // Get available dates (today and tomorrow only) — use local date so midnight in UTC+2 doesn't send yesterday
   const getAvailableDates = () => {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-
+    const localDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     return [
-      {
-        value: today.toISOString().split('T')[0],
-        label: 'Today',
-        date: today
-      },
-      {
-        value: tomorrow.toISOString().split('T')[0],
-        label: 'Tomorrow',
-        date: tomorrow
-      }
+      { value: localDateStr(today), label: 'Today', date: today },
+      { value: localDateStr(tomorrow), label: 'Tomorrow', date: tomorrow },
     ];
   };
 

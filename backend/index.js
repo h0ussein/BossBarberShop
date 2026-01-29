@@ -79,10 +79,11 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Rate limiting - General API limiter
+// Rate limiting - General API limiter (VERY SHORT WINDOW FOR DEVELOPMENT)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
+  max: 200, // 200 requests per window
+  skip: (req) => req.path.includes('/available-slots'), // Don't rate limit slot checking
   message: {
     success: false,
     message: 'Too many requests. Please try again later.',
@@ -103,18 +104,6 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Rate limiter for public booking creation (prevents spam)
-const bookingLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 bookings per hour per IP
-  message: {
-    success: false,
-    message: 'Too many booking attempts. Please try again later.',
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 // Apply general rate limiting to all API routes
 app.use('/api/', apiLimiter);
 
@@ -125,8 +114,8 @@ app.use('/api/auth/forgot-password', authLimiter);
 app.use('/api/admin/login', authLimiter);
 app.use('/api/barber-auth/login', authLimiter);
 
-// Apply rate limiting to public booking creation
-app.use('/api/bookings', bookingLimiter);
+// Note: Booking creation rate limit is applied directly in bookingRoutes.js, not here
+// (so that GET /available-slots is not rate-limited)
 
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));

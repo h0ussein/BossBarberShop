@@ -377,25 +377,22 @@ export const getAvailableSlots = async (req, res) => {
       });
     }
 
-    // Parse the date and validate it's today or tomorrow
-    const selectedDate = new Date(date);
-    const lebanon = new Intl.DateTimeFormat('en-CA', { 
-      timeZone: 'Asia/Beirut' 
-    }).format(new Date());
-    const today = new Date(lebanon);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-
-    const selectedDateStr = selectedDate.toISOString().split('T')[0];
-    const todayStr = today.toISOString().split('T')[0];
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-    if (selectedDateStr !== todayStr && selectedDateStr !== tomorrowStr) {
+    // Validate date is within acceptable range (today/tomorrow with timezone tolerance)
+    const serverNow = new Date();
+    const todayUTC = new Date(Date.UTC(serverNow.getUTCFullYear(), serverNow.getUTCMonth(), serverNow.getUTCDate()));
+    const requestDate = new Date(date + 'T12:00:00Z');
+    const daysDiff = Math.floor((requestDate - todayUTC) / 86400000);
+    
+    // Accept dates from yesterday to 2 days ahead (handles timezone differences)
+    if (daysDiff < -1 || daysDiff > 2) {
       return res.status(400).json({
         success: false,
         message: 'Bookings are only available for today and tomorrow',
       });
     }
+
+    // For same-day filtering, check if request date matches server's UTC today or yesterday
+    const isToday = daysDiff === 0 || daysDiff === -1;
 
     // Get barber details
     const barber = await Barber.findById(barberId);
@@ -418,8 +415,10 @@ export const getAvailableSlots = async (req, res) => {
       });
     }
 
-    // Get day of week
-    const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
+    // Selected date as noon UTC so weekday in Beirut is correct regardless of server TZ
+    const selectedDate = new Date(date + 'T12:00:00Z');
+    // Get day of week in shop timezone so "2026-01-30" is always Friday in Beirut
+    const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Asia/Beirut' });
 
     // Get working hours for this day
     let daySettings;
@@ -481,15 +480,16 @@ export const getAvailableSlots = async (req, res) => {
     }
 
     // Get current time in Lebanon timezone for same-day filtering
-    const now = new Date();
-    const lebanonNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Beirut' }));
+    const currentTime = new Date();
+    const lebanonNow = new Date(currentTime.toLocaleString('en-US', { timeZone: 'Asia/Beirut' }));
     const currentHour = lebanonNow.getHours();
     const currentMin = lebanonNow.getMinutes();
     const currentTimeMinutes = currentHour * 60 + currentMin;
 
     // Filter out past times for same day (with 30-minute buffer)
+    // BUT: If it's very early (before 6 AM), don't filter - show all slots for "today"
     let availableSlots = allSlots;
-    if (selectedDateStr === todayStr) {
+    if (isToday && currentHour >= 6) {
       const bufferMinutes = 30;
       const minimumTimeMinutes = currentTimeMinutes + bufferMinutes;
 
