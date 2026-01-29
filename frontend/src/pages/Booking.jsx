@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { barbersAPI, servicesAPI, settingsAPI, bookingsAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import SEO from '../components/SEO';
 
 const Booking = () => {
   const [step, setStep] = useState(1);
@@ -156,8 +157,27 @@ const Booking = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+      <div className="space-y-6">
+        {/* Progress Steps Skeleton */}
+        <div className="flex items-center justify-center gap-2" style={{ minHeight: '32px' }}>
+          {[1, 2, 3, 4].map((s) => (
+            <div key={s} className="flex items-center gap-2">
+              <div className="h-8 w-8 animate-pulse rounded-full bg-black/10"></div>
+              {s < 4 && <div className="h-0.5 w-6 bg-black/10"></div>}
+            </div>
+          ))}
+        </div>
+        {/* Form Skeleton */}
+        <div className="rounded-3xl border border-black/10 bg-white p-6 md:p-8" style={{ minHeight: '400px' }}>
+          <div className="h-3 w-16 animate-pulse rounded bg-black/10"></div>
+          <div className="mt-1 h-6 w-48 animate-pulse rounded bg-black/20"></div>
+          <div className="mt-6 space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 w-full animate-pulse rounded-2xl bg-black/5"></div>
+            ))}
+          </div>
+          <div className="mt-6 h-12 w-full animate-pulse rounded-full bg-black/10"></div>
+        </div>
       </div>
     );
   }
@@ -181,6 +201,9 @@ const Booking = () => {
                   src={selectedBarber.avatar.url}
                   alt={selectedBarber.name}
                   className="h-full w-full object-cover"
+                  width="48"
+                  height="48"
+                  loading="eager"
                 />
               ) : (
                 selectedBarber?.name?.charAt(0)
@@ -232,6 +255,12 @@ const Booking = () => {
 
   return (
     <div className="space-y-6">
+      <SEO 
+        title="Book Your Appointment | Salon Abed Barbershop"
+        description="Book your haircut appointment online at Salon Abed. Choose your barber, select a service, pick your date and time. Easy online booking for premium grooming services."
+        keywords="book haircut, barber appointment, online booking, schedule haircut, book barber, salon appointment"
+        canonicalUrl="https://bossbarbershop.onrender.com/book"
+      />
       {/* Progress Steps */}
       <div className="flex items-center justify-center gap-2">
         {[1, 2, 3, 4].map((s) => (
@@ -242,7 +271,7 @@ const Booking = () => {
                   ? 'bg-black text-white'
                   : step > s
                   ? 'bg-black/10 text-black'
-                  : 'bg-black/5 text-black/40'
+                  : 'bg-black/5 text-black/60'
               }`}
             >
               {step > s ? '✓' : s}

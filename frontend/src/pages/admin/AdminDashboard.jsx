@@ -71,7 +71,7 @@ const AdminDashboard = () => {
                 {stat.label}
               </p>
               <p className="mt-1 text-xl sm:text-2xl font-semibold text-white">{stat.value}</p>
-              <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/40">{stat.change}</p>
+              <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/60">{stat.change}</p>
             </div>
           ))}
         </div>
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
                     <span className="hidden sm:inline">•</span>
                     <span className="truncate">{booking.barber?.name}</span>
                   </div>
-                  <div className="mt-1 text-[10px] sm:text-xs text-white/40">
+                  <div className="mt-1 text-[10px] sm:text-xs text-white/60">
                     {booking.date} at {booking.time}
                   </div>
                 </div>

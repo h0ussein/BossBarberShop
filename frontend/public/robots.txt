@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /adminR/
+Disallow: /barber/
+Disallow: /auth
+Disallow: /verify-email
+Disallow: /reset-password
+
+Sitemap: https://bossbarbershop.onrender.com/sitemap.xml

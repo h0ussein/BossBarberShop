@@ -64,22 +64,22 @@ const BarberDashboard = () => {
           <div className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4">
             <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wide text-white/50">Today</p>
             <p className="mt-1 text-xl sm:text-2xl font-semibold text-white">{stats.today}</p>
-            <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/40">appointments</p>
+            <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/60">appointments</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4">
             <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wide text-white/50">Pending</p>
             <p className="mt-1 text-xl sm:text-2xl font-semibold text-yellow-400">{stats.pending}</p>
-            <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/40">to confirm</p>
+            <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/60">to confirm</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4">
             <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wide text-white/50">Confirmed</p>
             <p className="mt-1 text-xl sm:text-2xl font-semibold text-green-400">{stats.confirmed}</p>
-            <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/40">upcoming</p>
+            <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/60">upcoming</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4">
             <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wide text-white/50">Completed</p>
             <p className="mt-1 text-xl sm:text-2xl font-semibold text-blue-400">{stats.completed}</p>
-            <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/40">all time</p>
+            <p className="mt-0.5 text-[9px] sm:text-[10px] text-white/60">all time</p>
           </div>
         </div>
 
@@ -125,7 +125,7 @@ const BarberDashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="mt-4 text-center text-sm text-white/40">No appointments today</p>
+            <p className="mt-4 text-center text-sm text-white/60">No appointments today</p>
           )}
         </div>
 

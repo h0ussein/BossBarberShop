@@ -137,7 +137,7 @@ const Profile = () => {
         ) : !user?.email ? (
           <div className="mt-4 text-center">
             <p className="text-sm text-black/50">Please add an email address to view your appointments.</p>
-            <p className="mt-1 text-xs text-black/40">
+            <p className="mt-1 text-xs text-black/60">
               Appointments made without an email cannot be displayed here.
             </p>
           </div>
@@ -218,7 +218,7 @@ const Profile = () => {
                         ? 'text-green-600'
                         : apt.status === 'cancelled' 
                         ? 'text-red-500'
-                        : 'text-black/40'
+                        : 'text-black/60'
                     } capitalize`}
                   >
                     {apt.status}

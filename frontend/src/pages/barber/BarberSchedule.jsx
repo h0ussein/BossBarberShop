@@ -142,7 +142,7 @@ const BarberSchedule = () => {
                     <span className="text-sm font-medium text-white">{day.day}</span>
                   </div>
                   {!day.isWorking && (
-                    <span className="text-xs text-white/40">Day Off</span>
+                    <span className="text-xs text-white/60">Day Off</span>
                   )}
                 </div>
 
@@ -283,7 +283,7 @@ const BarberSchedule = () => {
           )}
 
           {daysOff.length === 0 && (
-            <p className="mt-4 text-center text-xs text-white/40">No days off scheduled</p>
+            <p className="mt-4 text-center text-xs text-white/60">No days off scheduled</p>
           )}
         </div>
       </div>

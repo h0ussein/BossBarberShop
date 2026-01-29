@@ -170,7 +170,7 @@ const AdminBarberSchedule = () => {
                     <span className="text-sm font-medium text-white">{day.day}</span>
                   </div>
                   {!day.isWorking && (
-                    <span className="text-xs text-white/40">Day Off</span>
+                    <span className="text-xs text-white/60">Day Off</span>
                   )}
                 </div>
 
@@ -325,7 +325,7 @@ const AdminBarberSchedule = () => {
             {schedule.map((day) => (
               <div key={day.day} className="flex items-center justify-between text-xs">
                 <span className="text-white/70">{day.day}</span>
-                <span className={day.isWorking ? 'text-white' : 'text-white/40'}>
+                <span className={day.isWorking ? 'text-white' : 'text-white/60'}>
                   {day.isWorking
                     ? `${day.startTime} - ${day.endTime}`
                     : 'Off'}

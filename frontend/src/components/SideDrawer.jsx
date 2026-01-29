@@ -1,21 +1,22 @@
 const SideDrawer = ({ open, onClose, items, onNavigate }) => {
+  if (!open) {
+    return null;
+  }
+
   return (
     <div
-      className={`fixed inset-0 z-40 transition lg:hidden ${
-        open ? 'pointer-events-auto' : 'pointer-events-none'
-      }`}
-      aria-hidden={!open}
+      className="fixed inset-0 z-40 lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigation menu"
     >
       <div
-        className={`absolute inset-0 bg-black/40 transition-opacity ${
-          open ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="absolute inset-0 bg-black/40 transition-opacity"
         onClick={onClose}
+        aria-hidden="true"
       ></div>
       <aside
-        className={`absolute left-0 top-0 h-full w-72 border-r border-black/10 bg-white p-6 shadow-xl transition-transform ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className="absolute left-0 top-0 h-full w-72 border-r border-black/10 bg-white p-6 shadow-xl animate-in slide-in-from-left"
       >
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -26,6 +27,7 @@ const SideDrawer = ({ open, onClose, items, onNavigate }) => {
             type="button"
             onClick={onClose}
             className="rounded-full border border-black/10 px-3 py-2 text-xs font-medium uppercase tracking-wide text-black/60 transition hover:border-black/30 hover:text-black"
+            aria-label="Close navigation menu"
           >
             Close
           </button>

@@ -12,9 +12,10 @@ const BottomNav = ({ items, activeTab, onChange }) => {
               className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium uppercase tracking-wide transition sm:px-4 ${
                 isActive
                   ? 'text-black'
-                  : 'text-black/40 hover:text-black/70'
+                  : 'text-black/50 hover:text-black/70'
               }`}
               aria-current={isActive ? 'page' : undefined}
+              aria-label={item.label}
             >
               <span
                 className={`flex h-9 w-9 items-center justify-center rounded-full transition ${

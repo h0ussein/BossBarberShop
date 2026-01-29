@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { servicesAPI, settingsAPI, homepageSectionsAPI } from '../services/api';
+import SEO from '../components/SEO';
 
 const Home = ({ onBook }) => {
   const [services, setServices] = useState([]);
@@ -30,14 +31,38 @@ const Home = ({ onBook }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+      <div className="space-y-6">
+        {/* Hero Section Skeleton */}
+        <div className="rounded-3xl border border-black/10 bg-black p-6 md:p-8" style={{ minHeight: '200px' }}>
+          <div className="h-3 w-20 animate-pulse rounded bg-white/20"></div>
+          <div className="mt-3 h-8 w-3/4 animate-pulse rounded bg-white/30"></div>
+          <div className="mt-4 h-16 w-full animate-pulse rounded bg-white/20"></div>
+          <div className="mt-6 h-12 w-full animate-pulse rounded-full bg-white/40 md:w-48"></div>
+        </div>
+        {/* Services Section Skeleton */}
+        <div className="rounded-3xl border border-black/10 bg-white p-6 md:p-8" style={{ minHeight: '200px' }}>
+          <div className="h-3 w-24 animate-pulse rounded bg-black/10"></div>
+          <div className="mt-4 space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center justify-between border-b border-black/10 pb-3">
+                <div className="h-4 w-32 animate-pulse rounded bg-black/10"></div>
+                <div className="h-4 w-12 animate-pulse rounded bg-black/10"></div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      <SEO 
+        title="Salon Abed - Premium Barbershop & Grooming Services | Book Online"
+        description="Experience precision grooming at Salon Abed. Expert barbers offering haircuts, beard trims, and premium styling. Book your appointment online today. Walk in looking good, walk out looking great."
+        keywords="barbershop, haircut, grooming, barber, beard trim, men's haircut, styling, Salon Abed, professional barber, book appointment"
+        canonicalUrl="https://bossbarbershop.onrender.com/"
+      />
       {/* Hero Section */}
       <section className="rounded-3xl border border-black/10 bg-black p-6 text-white md:p-8">
         <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">
@@ -118,6 +143,9 @@ const Home = ({ onBook }) => {
                   src={section.image.url}
                   alt={section.description || 'Homepage section'}
                   className="h-full w-full object-cover"
+                  loading="lazy"
+                  width="1200"
+                  height="675"
                 />
               </div>
               {section.description && (

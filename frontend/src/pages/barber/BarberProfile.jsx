@@ -76,7 +76,7 @@ const BarberProfile = () => {
             <div className="text-center sm:text-left">
               <h2 className="text-lg font-semibold text-white">{barber?.name}</h2>
               <p className="text-sm text-white/50">{barber?.barberRole || barber?.role}</p>
-              <p className="mt-1 text-xs text-white/40">Click on photo to change</p>
+              <p className="mt-1 text-xs text-white/60">Click on photo to change</p>
             </div>
           </div>
 

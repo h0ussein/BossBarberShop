@@ -284,7 +284,7 @@ const AdminBarbers = () => {
                   placeholder="email@example.com"
                 />
                 {!editingBarber && (
-                  <p className="mt-1 text-xs text-white/40">This will be the barber's login email</p>
+                  <p className="mt-1 text-xs text-white/60">This will be the barber's login email</p>
                 )}
               </div>
               <div>

@@ -136,7 +136,7 @@ const AdminHours = () => {
                     <span className="text-sm font-medium text-white">{day.day}</span>
                   </div>
                   {!day.isOpen && (
-                    <span className="text-xs text-white/40">Closed</span>
+                    <span className="text-xs text-white/60">Closed</span>
                   )}
                 </div>
 
@@ -180,7 +180,7 @@ const AdminHours = () => {
             {schedule.map((day) => (
               <div key={day.day} className="flex items-center justify-between text-xs">
                 <span className="text-white/70">{day.day}</span>
-                <span className={day.isOpen ? 'text-white' : 'text-white/40'}>
+                <span className={day.isOpen ? 'text-white' : 'text-white/60'}>
                   {day.isOpen
                     ? `${day.openTime} - ${day.closeTime}`
                     : 'Closed'}

@@ -85,7 +85,7 @@ const BarberLogin = () => {
         <div className="mt-6 text-center">
           <button
             onClick={() => navigate('/')}
-            className="text-xs text-white/40 transition hover:text-white/70"
+            className="text-xs text-white/60 transition hover:text-white/80"
           >
             ← Back to website
           </button>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { settingsAPI } from '../services/api';
+import SEO from '../components/SEO';
 
 const Contact = () => {
   const [settings, setSettings] = useState(null);
@@ -22,14 +23,32 @@ const Contact = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="rounded-3xl border border-black/10 bg-black p-6 md:p-8" style={{ minHeight: '180px' }}>
+          <div className="h-3 w-20 animate-pulse rounded bg-white/20"></div>
+          <div className="mt-3 h-8 w-48 animate-pulse rounded bg-white/30"></div>
+          <div className="mt-4 h-12 w-full animate-pulse rounded bg-white/20"></div>
+        </div>
+        {/* Content Skeletons */}
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="rounded-3xl border border-black/10 bg-white p-6 md:p-8" style={{ minHeight: '150px' }}>
+            <div className="h-3 w-24 animate-pulse rounded bg-black/10"></div>
+            <div className="mt-4 h-20 w-full animate-pulse rounded bg-black/5"></div>
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      <SEO 
+        title="Contact Us | Salon Abed Barbershop"
+        description="Get in touch with Salon Abed. Find our location, phone number, email, and working hours. Visit us for premium haircuts and grooming services."
+        keywords="contact salon abed, barbershop location, barbershop phone, working hours, barber contact, visit us"
+        canonicalUrl="https://bossbarbershop.onrender.com/contact"
+      />
       {/* Header */}
       <section className="rounded-3xl border border-black/10 bg-black p-6 text-white md:p-8">
         <h2 className="text-[10px] uppercase tracking-[0.35em] text-white/60">Get in Touch</h2>
@@ -46,7 +65,7 @@ const Contact = () => {
           <p className="font-semibold text-black">{settings?.shopName || 'Salon Abed'}</p>
           <p className="mt-1">{settings?.address || '123 Main Street, Downtown, City 12345'}</p>
         </div>
-        <div className="mt-4 flex h-40 items-center justify-center rounded-2xl border border-black/10 bg-black/[0.02] text-xs text-black/40">
+        <div className="mt-4 flex h-40 items-center justify-center rounded-2xl border border-black/10 bg-black/[0.02] text-xs text-black/60">
           Map Placeholder
         </div>
       </section>

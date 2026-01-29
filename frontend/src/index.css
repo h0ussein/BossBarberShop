@@ -1,1 +1,37 @@
 @import "tailwindcss";
+
+/* Performance Optimizations */
+
+/* Ensure smooth font rendering */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent layout shifts with content-visibility */
+.section-container {
+  content-visibility: auto;
+}
+
+/* Optimize images */
+img {
+  content-visibility: auto;
+}
+
+/* Reduce paint for animations */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-spin {
+    will-change: transform;
+  }
+}
+
+/* Disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
