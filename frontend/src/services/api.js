@@ -325,6 +325,32 @@ export const uploadAPI = {
   getAuthParamsBarber: () => barberApiCall('/upload/auth'),
 };
 
+// Deals API (public get + admin-protected for mutations)
+export const dealsAPI = {
+  // Public - get all deals (for Deals page)
+  getAll: () => apiCall('/deals'),
+
+  // Admin - create deal
+  create: (data) =>
+    adminApiCall('/deals', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Admin - update deal
+  update: (id, data) =>
+    adminApiCall(`/deals/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Admin - delete deal
+  delete: (id) =>
+    adminApiCall(`/deals/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
 // Homepage Sections API
 export const homepageSectionsAPI = {
   // Public - get active sections

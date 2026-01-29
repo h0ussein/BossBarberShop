@@ -20,6 +20,7 @@ import AdminBookings from './pages/admin/AdminBookings';
 import AdminHours from './pages/admin/AdminHours';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminHomepageSections from './pages/admin/AdminHomepageSections';
+import AdminDeals from './pages/admin/AdminDeals';
 
 // Barber Pages
 import BarberLogin from './pages/barber/BarberLogin';
@@ -147,6 +148,14 @@ const AdminRoutes = () => {
         element={
           <ProtectedAdminRoute>
             <AdminHomepageSections />
+          </ProtectedAdminRoute>
+        }
+      />
+      <Route
+        path="/deals"
+        element={
+          <ProtectedAdminRoute>
+            <AdminDeals />
           </ProtectedAdminRoute>
         }
       />

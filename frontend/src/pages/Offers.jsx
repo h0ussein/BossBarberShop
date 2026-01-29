@@ -1,29 +1,24 @@
+import { useState, useEffect } from 'react';
 import SEO from '../components/SEO';
+import { dealsAPI } from '../services/api';
 
 const Offers = () => {
-  const offers = [
-    {
-      id: 1,
-      title: 'First Visit Discount',
-      description: 'Get 20% off your first haircut when you book online.',
-      code: 'WELCOME20',
-      validUntil: 'Mar 31, 2026',
-    },
-    {
-      id: 2,
-      title: 'Combo Deal',
-      description: 'Hair + Beard combo for just $30 (save $5).',
-      code: 'COMBO5',
-      validUntil: 'Feb 28, 2026',
-    },
-    {
-      id: 3,
-      title: 'Refer a Friend',
-      description: 'Refer a friend and both get $10 off your next visit.',
-      code: 'REFER10',
-      validUntil: 'Ongoing',
-    },
-  ];
+  const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const res = await dealsAPI.getAll();
+        setOffers(res.data.deals || []);
+      } catch {
+        setOffers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOffers();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -43,21 +38,31 @@ const Offers = () => {
       </section>
 
       {/* Offers */}
-      {offers.map((offer) => (
-        <section
-          key={offer.id}
-          className="rounded-3xl border border-black/10 bg-white p-6 md:p-8"
-        >
-          <h3 className="text-lg font-semibold text-black">{offer.title}</h3>
-          <p className="mt-2 text-sm text-black/60">{offer.description}</p>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="rounded-xl border border-dashed border-black/30 bg-black/[0.02] px-4 py-2.5 text-center text-sm font-mono font-semibold tracking-widest text-black">
-              {offer.code}
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+        </div>
+      ) : offers.length > 0 ? (
+        offers.map((offer) => (
+          <section
+            key={offer._id}
+            className="rounded-3xl border border-black/10 bg-white p-6 md:p-8"
+          >
+            <h3 className="text-lg font-semibold text-black">{offer.title}</h3>
+            <p className="mt-2 text-sm text-black/60">{offer.description}</p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="rounded-xl border border-dashed border-black/30 bg-black/[0.02] px-4 py-2.5 text-center text-sm font-mono font-semibold tracking-widest text-black">
+                {offer.code}
+              </div>
+              <span className="text-xs text-black/50">Valid until {offer.validUntil}</span>
             </div>
-            <span className="text-xs text-black/50">Valid until {offer.validUntil}</span>
-          </div>
+          </section>
+        ))
+      ) : (
+        <section className="rounded-3xl border border-black/10 bg-white p-6 text-center md:p-8">
+          <p className="text-sm text-black/60">No offers at the moment. Check back soon!</p>
         </section>
-      ))}
+      )}
 
       {/* Coming Soon */}
       <section className="rounded-3xl border border-black/10 bg-white p-6 text-center md:p-8">

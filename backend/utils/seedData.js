@@ -1,6 +1,7 @@
 import Barber from '../models/Barber.js';
 import Service from '../models/Service.js';
 import Settings from '../models/Settings.js';
+import Deal from '../models/Deal.js';
 
 export const seedInitialData = async () => {
   try {
@@ -53,6 +54,18 @@ export const seedInitialData = async () => {
       };
       await Settings.create(settings);
       console.log('✓ Default settings created');
+    }
+
+    // Seed Deals (for Deals & Promotions page)
+    const dealCount = await Deal.countDocuments();
+    if (dealCount === 0) {
+      const deals = [
+        { title: 'First Visit Discount', description: 'Get 20% off your first haircut when you book online.', code: 'WELCOME20', validUntil: 'Mar 31, 2026' },
+        { title: 'Combo Deal', description: 'Hair + Beard combo for just $30 (save $5).', code: 'COMBO5', validUntil: 'Feb 28, 2026' },
+        { title: 'Refer a Friend', description: 'Refer a friend and both get $10 off your next visit.', code: 'REFER10', validUntil: 'Ongoing' },
+      ];
+      await Deal.insertMany(deals);
+      console.log('✓ Default deals created');
     }
   } catch (error) {
     console.error('Error seeding initial data:', error.message);
