@@ -101,6 +101,11 @@ barberSchema.pre('save', function () {
   }
 });
 
+// Indexes for better query performance
+barberSchema.index({ email: 1 }, { unique: true });
+barberSchema.index({ isActive: 1 });
+barberSchema.index({ createdAt: -1 });
+
 const Barber = mongoose.model('Barber', barberSchema);
 
 export default Barber;

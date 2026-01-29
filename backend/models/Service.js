@@ -33,6 +33,11 @@ const serviceSchema = new mongoose.Schema(
   }
 );
 
+// Indexes for better query performance
+serviceSchema.index({ isActive: 1 });
+serviceSchema.index({ price: 1 });
+serviceSchema.index({ createdAt: -1 });
+
 const Service = mongoose.model('Service', serviceSchema);
 
 export default Service;

@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/h0ussein/BossBarberShop/issues"
   },
-  "homepage": "https://github.com/h0ussein/BossBarberShop#readme"
+  "homepage": "https://github.com/h0ussein/BossBarberShop#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }

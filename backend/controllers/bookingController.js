@@ -3,7 +3,7 @@ import Barber from '../models/Barber.js';
 import Service from '../models/Service.js';
 import Settings from '../models/Settings.js';
 import { sendBookingNotificationToBarber, sendBookingConfirmationToCustomer } from '../utils/email.js';
-import { isValidObjectId, pickFields } from '../utils/validation.js';
+import { isValidObjectId, pickFields, isValidEmail, isValidPhone, isValidDate, isValidTime, sanitizeString } from '../utils/validation.js';
 
 // @desc    Get all bookings
 // @route   GET /api/bookings
@@ -107,6 +107,38 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Customer name and phone are required',
+      });
+    }
+
+    // Validate date format
+    if (!isValidDate(date)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid date format. Use YYYY-MM-DD',
+      });
+    }
+
+    // Validate time format
+    if (!isValidTime(time)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid time format. Use HH:MM AM/PM',
+      });
+    }
+
+    // Validate phone
+    if (!isValidPhone(customer.phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid phone number format',
+      });
+    }
+
+    // Validate email if provided
+    if (customer.email && !isValidEmail(customer.email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format',
       });
     }
     

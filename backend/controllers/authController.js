@@ -316,6 +316,13 @@ export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User account not found',
+      });
+    }
+
     res.json({
       success: true,
       data: {
@@ -346,6 +353,13 @@ export const updateProfile = async (req, res) => {
     const { name, phone } = req.body;
 
     const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User account not found',
+      });
+    }
 
     if (name) user.name = name;
     if (phone) user.phone = phone;

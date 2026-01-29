@@ -74,6 +74,13 @@ export const getAdminProfile = async (req, res) => {
   try {
     const admin = await Admin.findById(req.admin._id);
 
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin account not found',
+      });
+    }
+
     res.json({
       success: true,
       data: {

@@ -20,6 +20,39 @@ import { seedInitialData } from './utils/seedData.js';
 // Load env vars
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = [
+  'MONGO_URI',
+  'JWT_SECRET',
+  'FRONTEND_URL',
+  'RESEND_API_KEY',
+  'DEFAULT_ADMIN_PASSCODE',
+  'IMAGEKIT_PUBLIC_KEY',
+  'IMAGEKIT_PRIVATE_KEY',
+  'IMAGEKIT_URL_ENDPOINT',
+];
+
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:');
+  missingEnvVars.forEach(varName => console.error(`   - ${varName}`));
+  console.error('\nPlease add these variables to your .env file');
+  process.exit(1);
+}
+
+// Validate JWT_SECRET length
+if (process.env.JWT_SECRET.length < 32) {
+  console.error('❌ JWT_SECRET must be at least 32 characters long for security');
+  process.exit(1);
+}
+
+// Validate DEFAULT_ADMIN_PASSCODE length
+if (process.env.DEFAULT_ADMIN_PASSCODE.length < 6) {
+  console.error('❌ DEFAULT_ADMIN_PASSCODE must be at least 6 characters');
+  process.exit(1);
+}
+
 const __dirname = path.resolve();
 
 const app = express();
@@ -37,7 +70,7 @@ app.use(helmet({
 // CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
+    ? (process.env.FRONTEND_URL || 'https://salonabed.hair') // Secure fallback
     : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

@@ -49,6 +49,13 @@ export const loginBarber = async (req, res) => {
     // Get the linked barber record
     const barber = await Barber.findById(admin.barberId);
 
+    if (!barber) {
+      return res.status(404).json({
+        success: false,
+        message: 'Barber profile not found. Please contact administrator.',
+      });
+    }
+
     const token = generateToken(admin._id, 'barber');
 
     res.json({
@@ -62,8 +69,8 @@ export const loginBarber = async (req, res) => {
           name: admin.name,
           email: admin.email,
           role: admin.role,
-          barberRole: barber?.role,
-          phone: barber?.phone,
+          barberRole: barber.role,
+          phone: barber.phone,
         },
       },
     });
