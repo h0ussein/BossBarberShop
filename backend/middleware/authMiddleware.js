@@ -63,6 +63,7 @@ export const protectAdmin = async (req, res, next) => {
     }
 
     if (!token) {
+      console.error('Admin auth failed: No token provided');
       return res.status(401).json({
         success: false,
         message: 'Not authorized, no token provided',
@@ -72,6 +73,7 @@ export const protectAdmin = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!['admin', 'super_admin', 'barber'].includes(decoded.role)) {
+      console.error('Admin auth failed: Invalid role:', decoded.role);
       return res.status(401).json({
         success: false,
         message: 'Not authorized as admin',
@@ -81,6 +83,7 @@ export const protectAdmin = async (req, res, next) => {
     const admin = await Admin.findById(decoded.id);
 
     if (!admin) {
+      console.error('Admin auth failed: Admin not found for ID:', decoded.id);
       return res.status(401).json({
         success: false,
         message: 'Admin not found',
@@ -88,6 +91,7 @@ export const protectAdmin = async (req, res, next) => {
     }
 
     if (!admin.isActive) {
+      console.error('Admin auth failed: Account deactivated for:', admin.name);
       return res.status(401).json({
         success: false,
         message: 'Account has been deactivated',
@@ -97,6 +101,7 @@ export const protectAdmin = async (req, res, next) => {
     req.admin = admin;
     next();
   } catch (error) {
+    console.error('Admin auth middleware error:', error.message);
     return res.status(401).json({
       success: false,
       message: 'Not authorized, token invalid',

@@ -154,6 +154,88 @@ export const updatePasscode = async (req, res) => {
   }
 };
 
+// @desc    Fix admin record (temporary diagnostic)
+// @route   POST /api/admin/fix
+// @access  Public (temporary)
+export const fixAdminRecord = async (req, res) => {
+  try {
+    console.log('🔄 Checking admin records for issues...');
+    
+    // Find all admin records
+    const admins = await Admin.find({}).select('+passcode +password +email');
+    console.log(`Found ${admins.length} admin records`);
+    
+    if (admins.length === 0) {
+      // No admins exist - create fresh one
+      const newAdmin = await Admin.create({
+        name: 'Admin',
+        passcode: '301103',
+        role: 'super_admin',
+        isActive: true
+      });
+      
+      return res.json({
+        success: true,
+        message: 'New admin created with passcode 301103',
+        data: { adminId: newAdmin._id }
+      });
+    }
+    
+    // Check each admin record
+    let fixedCount = 0;
+    for (const admin of admins) {
+      let needsUpdate = false;
+      const updates = {};
+      
+      // Ensure required fields exist
+      if (!admin.name) {
+        updates.name = 'Admin';
+        needsUpdate = true;
+      }
+      
+      if (!admin.role) {
+        updates.role = 'super_admin';
+        needsUpdate = true;
+      }
+      
+      if (admin.isActive === undefined || admin.isActive === null) {
+        updates.isActive = true;
+        needsUpdate = true;
+      }
+      
+      // Handle passcode issues
+      if (!admin.passcode) {
+        updates.passcode = '301103';
+        needsUpdate = true;
+      }
+      
+      if (needsUpdate) {
+        // Use findByIdAndUpdate to trigger middleware
+        await Admin.findByIdAndUpdate(admin._id, updates);
+        fixedCount++;
+        console.log(`Fixed admin record: ${admin._id}`);
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `Admin records checked. ${fixedCount} record(s) fixed.`,
+      data: { 
+        totalAdmins: admins.length,
+        fixedCount: fixedCount,
+        defaultPasscode: '301103'
+      }
+    });
+    
+  } catch (error) {
+    console.error('Fix admin error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Fix failed',
+    });
+  }
+};
+
 // @desc    Create new admin (super admin only)
 // @route   POST /api/admin/create
 // @access  Private/SuperAdmin
