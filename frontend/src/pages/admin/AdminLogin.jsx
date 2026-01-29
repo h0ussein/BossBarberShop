@@ -78,7 +78,7 @@ const AdminLogin = () => {
         {/* Security note */}
         <div className="mt-6 text-center">
           <p className="text-xs text-white/40">
-            Secure admin access. Default passcode: 301103
+            Secure admin access only
           </p>
         </div>
       </div>
