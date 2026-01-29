@@ -20,6 +20,7 @@ const AdminBarbers = () => {
     email: '',
     phone: '',
     role: 'Barber',
+    password: '', // Optional password
   });
 
   useEffect(() => {
@@ -86,7 +87,7 @@ const AdminBarbers = () => {
       });
     } else {
       setEditingBarber(null);
-      setFormData({ name: '', email: '', phone: '', role: 'Barber' });
+      setFormData({ name: '', email: '', phone: '', role: 'Barber', password: '' });
     }
     setShowModal(true);
   };
@@ -95,7 +96,7 @@ const AdminBarbers = () => {
     setShowModal(false);
     setEditingBarber(null);
     setAvatarData(null);
-    setFormData({ name: '', email: '', phone: '', role: 'Barber' });
+    setFormData({ name: '', email: '', phone: '', role: 'Barber', password: '' });
   };
 
   const toggleActive = async (barber) => {
@@ -312,6 +313,27 @@ const AdminBarbers = () => {
                   <option value="Senior Barber" className="bg-zinc-900">Senior Barber</option>
                 </select>
               </div>
+              {/* Password field - only show when creating new barber */}
+              {!editingBarber && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-white/60">
+                    Password (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/30"
+                    placeholder="Leave empty to auto-generate"
+                  />
+                  <p className="mt-1 text-xs text-white/60">
+                    {formData.password 
+                      ? 'Custom password will be used' 
+                      : 'A random password will be auto-generated'}
+                  </p>
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -368,16 +390,27 @@ const AdminBarbers = () => {
               Make sure to save or share this password now. It won't be shown again!
             </p>
 
-            <button
-              onClick={() => {
-                setShowCredentials(false);
-                setCredentials(null);
-                setFormData({ name: '', email: '', phone: '', role: 'Barber' });
-              }}
-              className="mt-4 w-full rounded-xl bg-white py-2.5 text-sm font-medium text-black transition hover:bg-white/90"
-            >
-              Done
-            </button>
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`Email: ${credentials.email}\nPassword: ${credentials.password}\nLogin: ${window.location.origin}/barber`);
+                  toast.success('Credentials copied to clipboard!');
+                }}
+                className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm font-medium text-white/70 transition hover:border-white/20"
+              >
+                Copy All
+              </button>
+              <button
+                onClick={() => {
+                  setShowCredentials(false);
+                  setCredentials(null);
+                  setFormData({ name: '', email: '', phone: '', role: 'Barber', password: '' });
+                }}
+                className="flex-1 rounded-xl bg-white py-2.5 text-sm font-medium text-black transition hover:bg-white/90"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}
