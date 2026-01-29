@@ -1,4 +1,5 @@
 import Settings from '../models/Settings.js';
+import { pickFields } from '../utils/validation.js';
 
 // Default working hours
 const defaultWorkingHours = [
@@ -45,15 +46,19 @@ export const getSettings = async (req, res) => {
 // @access  Private/Admin
 export const updateSettings = async (req, res) => {
   try {
+    // Only allow specific fields (prevents mass assignment)
+    const allowedFields = ['shopName', 'tagline', 'phone', 'email', 'address', 'instagram', 'slotDuration', 'workingHours'];
+    const updates = pickFields(req.body, allowedFields);
+    
     let settings = await Settings.findOne();
     
     if (!settings) {
       settings = await Settings.create({
-        ...req.body,
-        workingHours: req.body.workingHours || defaultWorkingHours,
+        ...updates,
+        workingHours: updates.workingHours || defaultWorkingHours,
       });
     } else {
-      Object.assign(settings, req.body);
+      Object.assign(settings, updates);
       await settings.save();
     }
     
@@ -65,7 +70,7 @@ export const updateSettings = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };

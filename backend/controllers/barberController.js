@@ -1,6 +1,7 @@
 import Barber from '../models/Barber.js';
 import Admin from '../models/Admin.js';
 import imagekit from '../utils/imagekit.js';
+import { isValidObjectId, pickFields } from '../utils/validation.js';
 
 // Helper function to generate a random password
 const generatePassword = () => {
@@ -40,6 +41,14 @@ export const getBarbers = async (req, res) => {
 // @access  Public
 export const getBarber = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
     const barber = await Barber.findById(req.params.id);
     
     if (!barber) {
@@ -56,7 +65,7 @@ export const getBarber = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -118,9 +127,21 @@ export const createBarber = async (req, res) => {
 // @access  Private/Admin
 export const updateBarber = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
+    // Only allow specific fields to be updated (prevents mass assignment)
+    const allowedFields = ['name', 'email', 'phone', 'role', 'isActive', 'avatar'];
+    const updates = pickFields(req.body, allowedFields);
+    
     const barber = await Barber.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       { new: true, runValidators: true }
     );
     
@@ -139,7 +160,7 @@ export const updateBarber = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -149,6 +170,14 @@ export const updateBarber = async (req, res) => {
 // @access  Private/Admin
 export const deleteBarber = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
     const barber = await Barber.findByIdAndDelete(req.params.id);
     
     if (!barber) {
@@ -168,7 +197,7 @@ export const deleteBarber = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -178,6 +207,14 @@ export const deleteBarber = async (req, res) => {
 // @access  Private/Admin
 export const updateBarberSchedule = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
     const { workingHours, breakTime, daysOff } = req.body;
     
     const barber = await Barber.findById(req.params.id);
@@ -203,7 +240,7 @@ export const updateBarberSchedule = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -213,6 +250,14 @@ export const updateBarberSchedule = async (req, res) => {
 // @access  Public
 export const getBarberSchedule = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
     const barber = await Barber.findById(req.params.id).select('name workingHours breakTime daysOff');
     
     if (!barber) {
@@ -234,7 +279,7 @@ export const getBarberSchedule = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -244,7 +289,22 @@ export const getBarberSchedule = async (req, res) => {
 // @access  Private/Admin
 export const addDayOff = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
     const { date, reason } = req.body;
+    
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: 'Date is required',
+      });
+    }
     
     const barber = await Barber.findById(req.params.id);
     
@@ -264,7 +324,7 @@ export const addDayOff = async (req, res) => {
       });
     }
     
-    barber.daysOff.push({ date, reason });
+    barber.daysOff.push({ date: String(date), reason: reason ? String(reason) : '' });
     await barber.save();
     
     res.json({
@@ -275,7 +335,7 @@ export const addDayOff = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -285,6 +345,14 @@ export const addDayOff = async (req, res) => {
 // @access  Private/Admin
 export const removeDayOff = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
     const barber = await Barber.findById(req.params.id);
     
     if (!barber) {
@@ -305,7 +373,7 @@ export const removeDayOff = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -315,7 +383,22 @@ export const removeDayOff = async (req, res) => {
 // @access  Private/Admin
 export const updateBarberAvatar = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
     const { url, fileId } = req.body;
+    
+    if (!url || !fileId) {
+      return res.status(400).json({
+        success: false,
+        message: 'URL and fileId are required',
+      });
+    }
     
     const barber = await Barber.findById(req.params.id);
     
@@ -331,12 +414,12 @@ export const updateBarberAvatar = async (req, res) => {
       try {
         await imagekit.deleteFile(barber.avatar.fileId);
       } catch (err) {
-        console.log('Failed to delete old avatar:', err.message);
+        // Silent fail - old image cleanup is not critical
       }
     }
     
     // Update avatar
-    barber.avatar = { url, fileId };
+    barber.avatar = { url: String(url), fileId: String(fileId) };
     await barber.save();
     
     res.json({
@@ -347,7 +430,7 @@ export const updateBarberAvatar = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };

@@ -60,6 +60,11 @@ const bookingSchema = new mongoose.Schema(
 bookingSchema.index({ date: 1, barber: 1 });
 bookingSchema.index({ status: 1 });
 
+// Compound index to help prevent double bookings
+// Note: We can't use a unique index here because cancelled bookings should allow rebooking
+// The application logic handles this with status checks
+bookingSchema.index({ barber: 1, date: 1, time: 1, status: 1 });
+
 const Booking = mongoose.model('Booking', bookingSchema);
 
 export default Booking;

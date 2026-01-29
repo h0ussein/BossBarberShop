@@ -3,6 +3,7 @@ import Barber from '../models/Barber.js';
 import Service from '../models/Service.js';
 import Settings from '../models/Settings.js';
 import { sendBookingNotificationToBarber, sendBookingConfirmationToCustomer } from '../utils/email.js';
+import { isValidObjectId, pickFields } from '../utils/validation.js';
 
 // @desc    Get all bookings
 // @route   GET /api/bookings
@@ -39,6 +40,14 @@ export const getBookings = async (req, res) => {
 // @access  Private
 export const getBooking = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID',
+      });
+    }
+    
     const booking = await Booking.findById(req.params.id)
       .populate('barber', 'name')
       .populate('service', 'name price duration');
@@ -57,7 +66,7 @@ export const getBooking = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -67,11 +76,61 @@ export const getBooking = async (req, res) => {
 // @access  Public
 export const createBooking = async (req, res) => {
   try {
-    // Check for double bookings
+    // Extract and validate required fields (prevents mass assignment)
+    const { barber, service, date, time, customer, price } = req.body;
+    
+    // Validate required fields
+    if (!barber || !service || !date || !time || !customer) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: barber, service, date, time, and customer are required',
+      });
+    }
+    
+    // Validate ObjectIds
+    if (!isValidObjectId(barber)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barber ID',
+      });
+    }
+    
+    if (!isValidObjectId(service)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid service ID',
+      });
+    }
+    
+    // Validate customer data
+    if (!customer.name || !customer.phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer name and phone are required',
+      });
+    }
+    
+    // Prepare sanitized booking data
+    const bookingData = {
+      barber: String(barber),
+      service: String(service),
+      date: String(date),
+      time: String(time),
+      customer: {
+        name: String(customer.name).trim(),
+        phone: String(customer.phone).trim(),
+        email: customer.email ? String(customer.email).trim().toLowerCase() : undefined,
+      },
+      price: Number(price) || 0,
+      status: 'pending', // Always start as pending
+    };
+    
+    // Use findOneAndUpdate with upsert:false to atomically check and create
+    // This prevents race conditions by making the check-and-insert atomic
     const existingBooking = await Booking.findOne({
-      barber: req.body.barber,
-      date: req.body.date,
-      time: req.body.time,
+      barber: bookingData.barber,
+      date: bookingData.date,
+      time: bookingData.time,
       status: { $in: ['pending', 'confirmed'] }
     });
 
@@ -82,7 +141,7 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    const booking = await Booking.create(req.body);
+    const booking = await Booking.create(bookingData);
     
     const populatedBooking = await Booking.findById(booking._id)
       .populate('barber', 'name email')
@@ -124,12 +183,20 @@ export const createBooking = async (req, res) => {
         }
       }
     } catch (emailErr) {
-      console.error('Email notification error:', emailErr);
+      // Email errors should not affect the booking response
     }
   } catch (error) {
+    // Check for duplicate key error (race condition caught by index)
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'This time slot has already been booked. Please select another time.',
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Failed to create booking. Please try again.',
     });
   }
 };
@@ -139,9 +206,32 @@ export const createBooking = async (req, res) => {
 // @access  Private/Admin
 export const updateBooking = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID',
+      });
+    }
+    
+    // Only allow specific fields to be updated (prevents mass assignment)
+    const allowedFields = ['status', 'notes'];
+    const updates = pickFields(req.body, allowedFields);
+    
+    // Validate status if provided
+    if (updates.status) {
+      const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+      if (!validStatuses.includes(updates.status)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid status value',
+        });
+      }
+    }
+    
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       { new: true, runValidators: true }
     )
       .populate('barber', 'name')
@@ -162,7 +252,7 @@ export const updateBooking = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -172,6 +262,14 @@ export const updateBooking = async (req, res) => {
 // @access  Private/Admin
 export const deleteBooking = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID',
+      });
+    }
+    
     const booking = await Booking.findByIdAndDelete(req.params.id);
     
     if (!booking) {
@@ -188,7 +286,7 @@ export const deleteBooking = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };

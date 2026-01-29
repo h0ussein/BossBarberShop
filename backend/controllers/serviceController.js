@@ -1,4 +1,5 @@
 import Service from '../models/Service.js';
+import { isValidObjectId, pickFields } from '../utils/validation.js';
 
 // @desc    Get all services
 // @route   GET /api/services
@@ -28,6 +29,14 @@ export const getServices = async (req, res) => {
 // @access  Public
 export const getService = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid service ID',
+      });
+    }
+    
     const service = await Service.findById(req.params.id);
     
     if (!service) {
@@ -44,7 +53,7 @@ export const getService = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -54,7 +63,19 @@ export const getService = async (req, res) => {
 // @access  Private/Admin
 export const createService = async (req, res) => {
   try {
-    const service = await Service.create(req.body);
+    // Only allow specific fields (prevents mass assignment)
+    const allowedFields = ['name', 'description', 'price', 'duration', 'isActive'];
+    const serviceData = pickFields(req.body, allowedFields);
+    
+    // Validate required fields
+    if (!serviceData.name || serviceData.price === undefined || !serviceData.duration) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, price, and duration are required',
+      });
+    }
+    
+    const service = await Service.create(serviceData);
     
     res.status(201).json({
       success: true,
@@ -64,7 +85,7 @@ export const createService = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -74,9 +95,21 @@ export const createService = async (req, res) => {
 // @access  Private/Admin
 export const updateService = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid service ID',
+      });
+    }
+    
+    // Only allow specific fields (prevents mass assignment)
+    const allowedFields = ['name', 'description', 'price', 'duration', 'isActive'];
+    const updates = pickFields(req.body, allowedFields);
+    
     const service = await Service.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       { new: true, runValidators: true }
     );
     
@@ -95,7 +128,7 @@ export const updateService = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };
@@ -105,6 +138,14 @@ export const updateService = async (req, res) => {
 // @access  Private/Admin
 export const deleteService = async (req, res) => {
   try {
+    // Validate ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid service ID',
+      });
+    }
+    
     const service = await Service.findByIdAndDelete(req.params.id);
     
     if (!service) {
@@ -121,7 +162,7 @@ export const deleteService = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Server error',
     });
   }
 };

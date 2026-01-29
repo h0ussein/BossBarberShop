@@ -69,6 +69,18 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiter for public booking creation (prevents spam)
+const bookingLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // 10 bookings per hour per IP
+  message: {
+    success: false,
+    message: 'Too many booking attempts. Please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Apply general rate limiting to all API routes
 app.use('/api/', apiLimiter);
 
@@ -78,6 +90,9 @@ app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/forgot-password', authLimiter);
 app.use('/api/admin/login', authLimiter);
 app.use('/api/barber-auth/login', authLimiter);
+
+// Apply rate limiting to public booking creation
+app.use('/api/bookings', bookingLimiter);
 
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
