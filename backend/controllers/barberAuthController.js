@@ -1,8 +1,10 @@
 import Admin from '../models/Admin.js';
 import Barber from '../models/Barber.js';
 import Booking from '../models/Booking.js';
+import Service from '../models/Service.js';
 import { generateToken } from '../utils/generateToken.js';
 import imagekit from '../utils/imagekit.js';
+import { sendAppointmentConfirmationToCustomer, sendAppointmentCompletionToCustomer } from '../utils/email.js';
 
 // @desc    Barber login
 // @route   POST /api/barber-auth/login
@@ -256,7 +258,7 @@ export const updateBookingStatus = async (req, res) => {
     const booking = await Booking.findOne({
       _id: req.params.id,
       barber: admin.barberId,
-    });
+    }).populate('service', 'name price duration');
 
     if (!booking) {
       return res.status(404).json({
@@ -265,17 +267,50 @@ export const updateBookingStatus = async (req, res) => {
       });
     }
 
+    const oldStatus = booking.status;
     booking.status = status;
     await booking.save();
 
     const updatedBooking = await Booking.findById(booking._id)
-      .populate('service', 'name price duration');
+      .populate('service', 'name price duration')
+      .populate('barber', 'name');
 
+    // Send response immediately
     res.json({
       success: true,
       message: 'Booking updated successfully',
       data: { booking: updatedBooking },
     });
+
+    // Send email notifications based on status change
+    try {
+      if (booking.customer.email) {
+        const barber = await Barber.findById(admin.barberId);
+        
+        if (oldStatus === 'pending' && status === 'confirmed') {
+          // Barber accepted the appointment - send confirmation to customer
+          sendAppointmentConfirmationToCustomer(booking.customer.email, booking.customer.name, {
+            barberName: barber.name,
+            serviceName: booking.service.name,
+            date: booking.date,
+            time: booking.time,
+            price: booking.service.price,
+          }).catch(err => console.error('Failed to send confirmation email:', err));
+        } 
+        else if (oldStatus === 'confirmed' && status === 'completed') {
+          // Barber completed the appointment - send completion email to customer
+          sendAppointmentCompletionToCustomer(booking.customer.email, booking.customer.name, {
+            barberName: barber.name,
+            serviceName: booking.service.name,
+            date: booking.date,
+            time: booking.time,
+            price: booking.service.price,
+          }).catch(err => console.error('Failed to send completion email:', err));
+        }
+      }
+    } catch (emailErr) {
+      console.error('Email notification error:', emailErr);
+    }
   } catch (error) {
     res.status(500).json({
       success: false,

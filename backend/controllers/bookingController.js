@@ -93,6 +93,7 @@ export const createBooking = async (req, res) => {
           date: booking.date,
           time: booking.time,
           price: service.price,
+          bookingId: booking._id,
         }).catch(err => console.error('Failed to send barber notification:', err));
         
         // Send confirmation to customer if they provided email

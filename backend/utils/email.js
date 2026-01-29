@@ -218,7 +218,7 @@ export const sendWelcomeEmail = async (email, name) => {
 };
 
 /**
- * Send booking notification to barber
+ * Send booking notification to barber (pending appointment)
  */
 export const sendBookingNotificationToBarber = async (barberEmail, barberName, bookingDetails) => {
   if (!resend) {
@@ -226,7 +226,7 @@ export const sendBookingNotificationToBarber = async (barberEmail, barberName, b
     return { success: false, error: { message: 'Email service not configured' } };
   }
 
-  const { customerName, customerPhone, serviceName, date, time, price } = bookingDetails;
+  const { customerName, customerPhone, serviceName, date, time, price, bookingId } = bookingDetails;
   
   // Format date for display
   const formattedDate = new Date(date).toLocaleDateString('en-US', {
@@ -240,7 +240,7 @@ export const sendBookingNotificationToBarber = async (barberEmail, barberName, b
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: barberEmail,
-      subject: `New Booking - ${formattedDate} at ${time}`,
+      subject: `New Appointment Request - ${formattedDate} at ${time}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -264,9 +264,9 @@ export const sendBookingNotificationToBarber = async (barberEmail, barberName, b
                   <!-- Content -->
                   <tr>
                     <td style="padding: 40px;">
-                      <h2 style="margin: 0 0 10px; color: #000000; font-size: 22px; font-weight: 600;">New Booking!</h2>
+                      <h2 style="margin: 0 0 10px; color: #000000; font-size: 22px; font-weight: 600;">New Appointment Request!</h2>
                       <p style="margin: 0 0 25px; color: #666666; font-size: 15px; line-height: 1.6;">
-                        Hey ${barberName}, you have a new appointment scheduled.
+                        Hey ${barberName}, you have a new appointment request. Please review and accept the booking.
                       </p>
                       
                       <!-- Booking Details Card -->
@@ -310,7 +310,7 @@ export const sendBookingNotificationToBarber = async (barberEmail, barberName, b
                         <tr>
                           <td align="center">
                             <a href="${process.env.FRONTEND_URL}/barber/bookings" style="display: inline-block; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 35px; border-radius: 10px;">
-                              View All Bookings
+                              Accept Appointment
                             </a>
                           </td>
                         </tr>
@@ -349,7 +349,7 @@ export const sendBookingNotificationToBarber = async (barberEmail, barberName, b
 };
 
 /**
- * Send booking confirmation to customer
+ * Send booking confirmation to customer (initial booking)
  */
 export const sendBookingConfirmationToCustomer = async (customerEmail, customerName, bookingDetails) => {
   if (!resend) {
@@ -371,7 +371,7 @@ export const sendBookingConfirmationToCustomer = async (customerEmail, customerN
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: `Booking Confirmed - ${formattedDate} at ${time}`,
+      subject: `Appointment Booked - ${formattedDate} at ${time}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -399,9 +399,145 @@ export const sendBookingConfirmationToCustomer = async (customerEmail, customerN
                         <div style="width: 60px; height: 60px; background-color: #e8f5e9; border-radius: 50%; margin: 0 auto 15px; line-height: 60px;">
                           <span style="font-size: 30px;">✓</span>
                         </div>
-                        <h2 style="margin: 0 0 10px; color: #000000; font-size: 22px; font-weight: 600;">Booking Confirmed!</h2>
+                        <h2 style="margin: 0 0 10px; color: #000000; font-size: 22px; font-weight: 600;">Appointment Booked!</h2>
                         <p style="margin: 0; color: #666666; font-size: 15px;">
-                          Thanks ${customerName}, your appointment is confirmed.
+                          Thanks ${customerName}, your appointment has been booked and is pending confirmation from ${barberName}.
+                        </p>
+                      </div>
+                      
+                      <!-- Booking Details Card -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                        <tr>
+                          <td>
+                            <table width="100%" cellpadding="8" cellspacing="0">
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Barber</td>
+                                <td style="color: #000000; font-size: 15px; font-weight: 600; text-align: right;">${barberName}</td>
+                              </tr>
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Service</td>
+                                <td style="color: #000000; font-size: 15px; text-align: right;">${serviceName}</td>
+                              </tr>
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Date</td>
+                                <td style="color: #000000; font-size: 15px; text-align: right;">${formattedDate}</td>
+                              </tr>
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Time</td>
+                                <td style="color: #000000; font-size: 15px; font-weight: 600; text-align: right;">${time}</td>
+                              </tr>
+                              ${price ? `
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Price</td>
+                                <td style="color: #000000; font-size: 15px; font-weight: 600; text-align: right;">$${price}</td>
+                              </tr>
+                              ` : ''}
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <p style="margin: 0 0 20px; color: #666666; font-size: 14px; line-height: 1.6; text-align: center;">
+                        You'll receive another email once your barber confirms the appointment.
+                      </p>
+                      
+                      <!-- Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td align="center">
+                            <a href="${process.env.FRONTEND_URL}/profile" style="display: inline-block; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 35px; border-radius: 10px;">
+                              View My Bookings
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #fafafa; padding: 25px 40px; text-align: center; border-top: 1px solid #eeeeee;">
+                      <p style="margin: 0; color: #999999; font-size: 12px;">
+                        Need to cancel or reschedule? Contact us directly.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send booking confirmation:', error);
+      return { success: false, error };
+    }
+
+    console.log('Booking confirmation sent to customer:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error sending booking confirmation:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Send appointment confirmation to customer (when barber accepts)
+ */
+export const sendAppointmentConfirmationToCustomer = async (customerEmail, customerName, bookingDetails) => {
+  if (!resend) {
+    console.error('Cannot send email: Resend is not initialized.');
+    return { success: false, error: { message: 'Email service not configured' } };
+  }
+
+  const { barberName, serviceName, date, time, price } = bookingDetails;
+  
+  // Format date for display
+  const formattedDate = new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Appointment Confirmed - ${formattedDate} at ${time}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="100%" style="max-width: 500px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                  <!-- Header -->
+                  <tr>
+                    <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">BOSS</h1>
+                      <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px;">
+                      <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="width: 60px; height: 60px; background-color: #e8f5e9; border-radius: 50%; margin: 0 auto 15px; line-height: 60px;">
+                          <span style="font-size: 30px;">✓</span>
+                        </div>
+                        <h2 style="margin: 0 0 10px; color: #000000; font-size: 22px; font-weight: 600;">Appointment Confirmed!</h2>
+                        <p style="margin: 0; color: #666666; font-size: 15px;">
+                          Great news ${customerName}! ${barberName} has confirmed your appointment.
                         </p>
                       </div>
                       
@@ -480,6 +616,142 @@ export const sendBookingConfirmationToCustomer = async (customerEmail, customerN
     return { success: true, data };
   } catch (error) {
     console.error('Error sending booking confirmation:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Send appointment completion notification to customer
+ */
+export const sendAppointmentCompletionToCustomer = async (customerEmail, customerName, bookingDetails) => {
+  if (!resend) {
+    console.error('Cannot send email: Resend is not initialized.');
+    return { success: false, error: { message: 'Email service not configured' } };
+  }
+
+  const { barberName, serviceName, date, time, price } = bookingDetails;
+  
+  // Format date for display
+  const formattedDate = new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Service Complete - Thank You!`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="100%" style="max-width: 500px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                  <!-- Header -->
+                  <tr>
+                    <td style="background-color: #000000; padding: 30px 40px; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">BOSS</h1>
+                      <p style="margin: 5px 0 0; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;">BARBERSHOP</p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px;">
+                      <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="width: 60px; height: 60px; background-color: #e8f5e9; border-radius: 50%; margin: 0 auto 15px; line-height: 60px;">
+                          <span style="font-size: 30px;">🎉</span>
+                        </div>
+                        <h2 style="margin: 0 0 10px; color: #000000; font-size: 22px; font-weight: 600;">Service Complete!</h2>
+                        <p style="margin: 0; color: #666666; font-size: 15px;">
+                          Thanks ${customerName}! We hope you love your new look.
+                        </p>
+                      </div>
+                      
+                      <!-- Service Details Card -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                        <tr>
+                          <td>
+                            <table width="100%" cellpadding="8" cellspacing="0">
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Barber</td>
+                                <td style="color: #000000; font-size: 15px; font-weight: 600; text-align: right;">${barberName}</td>
+                              </tr>
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Service</td>
+                                <td style="color: #000000; font-size: 15px; text-align: right;">${serviceName}</td>
+                              </tr>
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Date</td>
+                                <td style="color: #000000; font-size: 15px; text-align: right;">${formattedDate}</td>
+                              </tr>
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Time</td>
+                                <td style="color: #000000; font-size: 15px; font-weight: 600; text-align: right;">${time}</td>
+                              </tr>
+                              ${price ? `
+                              <tr>
+                                <td style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Total</td>
+                                <td style="color: #000000; font-size: 15px; font-weight: 600; text-align: right;">$${price}</td>
+                              </tr>
+                              ` : ''}
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <p style="margin: 0 0 20px; color: #666666; font-size: 14px; line-height: 1.6; text-align: center;">
+                        We'd love to hear about your experience! Book again anytime.
+                      </p>
+                      
+                      <!-- Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td align="center">
+                            <a href="${process.env.FRONTEND_URL}/booking" style="display: inline-block; background-color: #000000; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 35px; border-radius: 10px;">
+                              Book Next Appointment
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #fafafa; padding: 25px 40px; text-align: center; border-top: 1px solid #eeeeee;">
+                      <p style="margin: 0; color: #999999; font-size: 12px;">
+                        Thank you for choosing BOSS Barbershop! We look forward to seeing you again.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send appointment completion:', error);
+      return { success: false, error };
+    }
+
+    console.log('Appointment completion sent to customer:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error sending appointment completion:', error);
     return { success: false, error };
   }
 };
