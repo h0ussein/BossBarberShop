@@ -4,22 +4,15 @@ import { settingsAPI } from '../services/api';
 const Contact = () => {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
-    // Only fetch if we haven't fetched before
-    if (!hasFetched) {
-      fetchSettings();
-    }
-  }, [hasFetched]);
+    fetchSettings();
+  }, []);
 
   const fetchSettings = async () => {
-    if (hasFetched) return; // Prevent duplicate fetches
-    
     try {
       const res = await settingsAPI.get();
       setSettings(res.data.settings);
-      setHasFetched(true);
     } catch (error) {
       console.error('Failed to load settings:', error);
     } finally {

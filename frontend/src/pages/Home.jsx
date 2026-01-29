@@ -6,18 +6,12 @@ const Home = ({ onBook }) => {
   const [settings, setSettings] = useState(null);
   const [homepageSections, setHomepageSections] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
-    // Only fetch if we haven't fetched before
-    if (!hasFetched) {
-      fetchData();
-    }
-  }, [hasFetched]);
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
-    if (hasFetched) return; // Prevent duplicate fetches
-    
     try {
       const [servicesRes, settingsRes, sectionsRes] = await Promise.all([
         servicesAPI.getAll(true),
@@ -27,7 +21,6 @@ const Home = ({ onBook }) => {
       setServices(servicesRes.data.services);
       setSettings(settingsRes.data.settings);
       setHomepageSections(sectionsRes.data.sections || []);
-      setHasFetched(true);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {

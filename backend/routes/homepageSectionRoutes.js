@@ -17,8 +17,8 @@ router.get('/', getHomepageSections);
 // Admin routes (protected)
 router.get('/admin/all', protectAdmin, getAllHomepageSections);
 router.post('/admin', protectAdmin, createHomepageSection);
+router.put('/admin/reorder', protectAdmin, reorderHomepageSections);
 router.put('/admin/:id', protectAdmin, updateHomepageSection);
 router.delete('/admin/:id', protectAdmin, deleteHomepageSection);
-router.put('/admin/reorder', protectAdmin, reorderHomepageSections);
 
 export default router;

@@ -7,7 +7,6 @@ import {
   updateAdmin,
   deleteAdmin,
   updatePasscode,
-  fixAdminRecord,
 } from '../controllers/adminAuthController.js';
 import { protectAdmin, superAdminOnly } from '../middleware/authMiddleware.js';
 
@@ -15,8 +14,6 @@ const router = express.Router();
 
 // Public routes
 router.post('/login', loginAdmin);
-// Temporary fix route
-router.post('/fix', fixAdminRecord);
 
 // Protected admin routes
 router.get('/profile', protectAdmin, getAdminProfile);

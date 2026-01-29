@@ -25,6 +25,9 @@ export const getSettings = async (req, res) => {
       });
     }
     
+    // Prevent browser caching to always get fresh data
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    
     res.json({
       success: true,
       data: { settings },

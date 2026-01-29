@@ -1,5 +1,4 @@
 // Use environment variable for API URL, fallback to relative path in production
-import dotenv from 'dotenv'
 const API_BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000/api" : "/api";
 
 // Helper function for API calls with specific token type
