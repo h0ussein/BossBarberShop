@@ -308,13 +308,24 @@ const Booking = () => {
                     className="sr-only"
                   />
                   <div
-                    className={`flex h-14 w-14 items-center justify-center rounded-full text-xl font-semibold transition ${
+                    className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full text-xl font-semibold transition ${
                       formData.barber === barber._id
                         ? 'bg-black text-white'
                         : 'bg-black/10 text-black'
                     }`}
                   >
-                    {barber.name.charAt(0)}
+                    {barber.avatar?.url ? (
+                      <img
+                        src={barber.avatar.url}
+                        alt={barber.name}
+                        className="h-full w-full object-cover"
+                        width="56"
+                        height="56"
+                        loading="lazy"
+                      />
+                    ) : (
+                      barber.name.charAt(0)
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-black">{barber.name}</p>

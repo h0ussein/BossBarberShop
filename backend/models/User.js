@@ -105,8 +105,7 @@ userSchema.methods.generatePasswordResetToken = function () {
   return token;
 };
 
-// Indexes for better query performance
-userSchema.index({ email: 1 }, { unique: true });
+// Indexes for better query performance (email unique from field)
 userSchema.index({ isEmailVerified: 1 });
 userSchema.index({ isActive: 1 });
 userSchema.index({ createdAt: -1 });

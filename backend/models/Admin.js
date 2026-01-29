@@ -13,7 +13,8 @@ const adminSchema = new mongoose.Schema(
       type: String,
       trim: true,
       lowercase: true,
-      sparse: true, // Allow null/undefined, but must be unique if present
+      sparse: true,
+      unique: true, // Allow null/undefined, but must be unique if present (single index)
       // Only required for barbers, not for super_admin
     },
     passcode: {
@@ -72,8 +73,7 @@ adminSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Indexes for better query performance
-adminSchema.index({ email: 1 }, { sparse: true, unique: true });
+// Indexes for better query performance (email index from field unique+sparse)
 adminSchema.index({ role: 1 });
 adminSchema.index({ barberId: 1 }, { sparse: true });
 adminSchema.index({ isActive: 1 });

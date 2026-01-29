@@ -101,8 +101,7 @@ barberSchema.pre('save', function () {
   }
 });
 
-// Indexes for better query performance
-barberSchema.index({ email: 1 }, { unique: true });
+// Indexes for better query performance (email unique from field)
 barberSchema.index({ isActive: 1 });
 barberSchema.index({ createdAt: -1 });
 
