@@ -13,7 +13,7 @@ const MobileShell = ({
   children,
 }) => {
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-gradient-to-b from-white via-white to-black/5 text-black">
       <TopBar
         onMenuClick={() => setDrawerOpen(true)}
         onQuickBook={() => onTabChange('booking')}
