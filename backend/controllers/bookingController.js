@@ -4,6 +4,7 @@ import Service from '../models/Service.js';
 import Settings from '../models/Settings.js';
 import { sendBookingNotificationToBarber, sendBookingConfirmationToCustomer } from '../utils/email.js';
 import { isValidObjectId, pickFields, isValidEmail, isValidPhone, isValidDate, isValidTime, sanitizeString } from '../utils/validation.js';
+import { sendPushToBarber } from './pushNotificationController.js';
 
 // @desc    Get all bookings
 // @route   GET /api/bookings
@@ -186,13 +187,13 @@ export const createBooking = async (req, res) => {
       data: { booking: populatedBooking },
     });
     
-    // Send email notifications in background (after response sent)
+    // Send email notifications and push notifications in background (after response sent)
     try {
       const barber = await Barber.findById(booking.barber);
       const service = await Service.findById(booking.service);
       
       if (barber && service) {
-        // Send notification to barber
+        // Send email notification to barber
         sendBookingNotificationToBarber(barber.email, barber.name, {
           customerName: booking.customer.name,
           customerPhone: booking.customer.phone,
@@ -202,6 +203,24 @@ export const createBooking = async (req, res) => {
           price: service.price,
           bookingId: booking._id,
         }).catch(err => console.error('Failed to send barber notification:', err));
+        
+        // Send push notification to barber
+        sendPushToBarber(booking.barber, {
+          title: '🔔 New Booking!',
+          body: `${booking.customer.name} booked ${service.name} on ${booking.date} at ${booking.time}`,
+          icon: '/favicon.png',
+          badge: '/favicon.png',
+          data: {
+            bookingId: booking._id.toString(),
+            customerName: booking.customer.name,
+            customerPhone: booking.customer.phone,
+            serviceName: service.name,
+            date: booking.date,
+            time: booking.time,
+            price: service.price,
+            url: '/barber/bookings',
+          },
+        }).catch(err => console.error('Failed to send push notification:', err));
         
         // Send confirmation to customer if they provided email
         if (booking.customer.email) {

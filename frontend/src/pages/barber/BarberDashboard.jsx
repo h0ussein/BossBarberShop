@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BarberLayout from '../../components/barber/BarberLayout';
+import NotificationPermission from '../../components/NotificationPermission';
 import { barberAuthAPI } from '../../services/api';
 import { useBarberAuth } from '../../contexts/BarberAuthContext';
 
@@ -58,6 +59,9 @@ const BarberDashboard = () => {
           </h1>
           <p className="text-sm text-white/50">Here's your overview for today</p>
         </div>
+
+        {/* Notification Permission */}
+        <NotificationPermission />
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">

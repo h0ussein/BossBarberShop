@@ -15,6 +15,7 @@ import settingsRoutes from './routes/settingsRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import homepageSectionRoutes from './routes/homepageSectionRoutes.js';
 import dealRoutes from './routes/dealRoutes.js';
+import pushNotificationRoutes from './routes/pushNotificationRoutes.js';
 import { seedDefaultAdmin } from './utils/seedAdmin.js';
 import { seedInitialData } from './utils/seedData.js';
 
@@ -131,6 +132,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/homepage-sections', homepageSectionRoutes);
 app.use('/api/deals', dealRoutes);
+app.use('/api/push', pushNotificationRoutes);
 
 // Health check (API)
 app.get('/api/health', (req, res) => {

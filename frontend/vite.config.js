@@ -9,9 +9,19 @@ export default defineConfig({
     // Optimize chunk size
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      input: {
+        main: './index.html',
+        sw: './public/service-worker.js',
+      },
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        },
+        entryFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'sw') {
+            return 'service-worker.js';
+          }
+          return 'assets/[name]-[hash].js';
         },
       },
     },
