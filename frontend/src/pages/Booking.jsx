@@ -251,7 +251,7 @@ const Booking = () => {
         title="Book Your Appointment | Salon Abed Barbershop"
         description="Book your haircut appointment online at Salon Abed. Choose your barber, select a service, pick your date and time. Easy online booking for premium grooming services."
         keywords="book haircut, barber appointment, online booking, schedule haircut, book barber, salon appointment"
-        canonicalUrl="https://bossbarbershop.onrender.com/book"
+        canonicalUrl="https://salonabed.hair/book"
       />
       {/* Progress Steps */}
       <div className="flex items-center justify-center gap-2">

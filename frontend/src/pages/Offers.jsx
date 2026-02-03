@@ -26,7 +26,7 @@ const Offers = () => {
         title="Special Offers & Deals | Salon Abed Barbershop"
         description="Check out our special offers and promotions at Salon Abed. Get discounts on haircuts, combo deals, and referral bonuses. Save on premium grooming services."
         keywords="barbershop deals, haircut discount, special offers, barber promotion, combo deals, referral bonus, salon offers"
-        canonicalUrl="https://bossbarbershop.onrender.com/offers"
+        canonicalUrl="https://salonabed.hair/offers"
       />
       {/* Header */}
       <section className="rounded-3xl border border-black/10 bg-black p-6 text-white md:p-8">

@@ -16,9 +16,9 @@ const SEO = ({
   title = 'Salon Abed - Premium Barbershop & Grooming Services',
   description = 'Experience precision grooming at Salon Abed. Expert barbers offering haircuts, beard trims, and premium styling. Book your appointment online today.',
   keywords = 'barbershop, haircut, grooming, barber, beard trim, Salon Abed',
-  canonicalUrl = 'https://bossbarbershop.onrender.com/',
+  canonicalUrl = 'https://salonabed.hair/',
   ogType = 'website',
-  ogImage = 'https://bossbarbershop.onrender.com/og-image.png',
+  ogImage = 'https://salonabed.hair/og-image.png',
 }) => {
   useEffect(() => {
     // Update document title

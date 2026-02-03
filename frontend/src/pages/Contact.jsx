@@ -47,7 +47,7 @@ const Contact = () => {
         title="Contact Us | Salon Abed Barbershop"
         description="Get in touch with Salon Abed. Find our location, phone number, email, and working hours. Visit us for premium haircuts and grooming services."
         keywords="contact salon abed, barbershop location, barbershop phone, working hours, barber contact, visit us"
-        canonicalUrl="https://bossbarbershop.onrender.com/contact"
+        canonicalUrl="https://salonabed.hair/contact"
       />
       {/* Header */}
       <section className="rounded-3xl border border-black/10 bg-black p-6 text-white md:p-8">

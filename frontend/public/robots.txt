@@ -5,4 +5,4 @@ Disallow: /auth
 Disallow: /verify-email
 Disallow: /reset-password
 
-Sitemap: https://bossbarbershop.onrender.com/sitemap.xml
+Sitemap: https://salonabed.hair/sitemap.xml

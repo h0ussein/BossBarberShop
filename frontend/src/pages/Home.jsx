@@ -62,7 +62,7 @@ const Home = ({ onBook }) => {
         title="Salon Abed - Premium Barbershop & Grooming Services | Book Online"
         description="Experience precision grooming at Salon Abed. Expert barbers offering haircuts, beard trims, and premium styling. Book your appointment online today. Walk in looking good, walk out looking great."
         keywords="barbershop, haircut, grooming, barber, beard trim, men's haircut, styling, Salon Abed, professional barber, book appointment"
-        canonicalUrl="https://bossbarbershop.onrender.com/"
+        canonicalUrl="https://salonabed.hair/"
       />
       {/* Hero Section – first section with abed.jpeg background */}
       <section

@@ -6,7 +6,7 @@
   
   <!-- Homepage - Highest Priority -->
   <url>
-    <loc>https://bossbarbershop.onrender.com/</loc>
+    <loc>https://salonabed.hair/</loc>
     <lastmod>2026-01-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
   
   <!-- Book Appointment - High Priority -->
   <url>
-    <loc>https://bossbarbershop.onrender.com/book</loc>
+    <loc>https://salonabed.hair/book</loc>
     <lastmod>2026-01-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -22,7 +22,7 @@
   
   <!-- Contact Page -->
   <url>
-    <loc>https://bossbarbershop.onrender.com/contact</loc>
+    <loc>https://salonabed.hair/contact</loc>
     <lastmod>2026-01-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -30,7 +30,7 @@
   
   <!-- Offers/Promotions Page -->
   <url>
-    <loc>https://bossbarbershop.onrender.com/offers</loc>
+    <loc>https://salonabed.hair/offers</loc>
     <lastmod>2026-01-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -38,7 +38,7 @@
   
   <!-- Profile Page (for logged-in users) -->
   <url>
-    <loc>https://bossbarbershop.onrender.com/profile</loc>
+    <loc>https://salonabed.hair/profile</loc>
     <lastmod>2026-01-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
