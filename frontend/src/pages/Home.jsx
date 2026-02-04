@@ -57,138 +57,158 @@ const Home = ({ onBook }) => {
   }
 
   return (
-    <div className="space-y-5 md:space-y-6">
+    <div className="bg-white">
       <SEO 
         title="Salon Abed - Premium Barbershop & Grooming Services | Book Online"
         description="Experience precision grooming at Salon Abed. Expert barbers offering haircuts, beard trims, and premium styling. Book your appointment online today. Walk in looking good, walk out looking great."
         keywords="barbershop, haircut, grooming, barber, beard trim, men's haircut, styling, Salon Abed, professional barber, book appointment"
         canonicalUrl="https://salonabed.hair/"
       />
-      {/* Hero Section – first section with abed.jpeg background */}
+      
+      {/* Hero Section */}
       <section
-        className="relative min-h-[320px] overflow-hidden rounded-3xl border border-black/10 bg-cover bg-center bg-no-repeat p-6 text-white shadow-xl md:min-h-[380px] md:p-8 md:p-10"
+        className="relative min-h-[400px] overflow-hidden bg-cover bg-center bg-no-repeat text-white md:min-h-[450px]"
         style={{ backgroundImage: `url(${abedBg})` }}
       >
-        <div className="absolute inset-0 rounded-3xl bg-black/70" />
-        <div className="relative z-10">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/70 font-medium">
-            {settings?.shopName || 'Salon Abed'}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+        <div className="relative z-10 flex min-h-[400px] flex-col items-center justify-center px-6 py-12 text-center md:min-h-[450px] md:py-16">
+          <h1 className="mb-2 text-2xl font-light uppercase tracking-[0.3em] text-white md:text-3xl">
+            ABED MERHI
+          </h1>
+          <p className="mb-6 text-[10px] uppercase tracking-[0.4em] text-white/70 md:text-xs">
+            BARBERSHOP
           </p>
-          <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl md:leading-tight">
-            Sharp cuts.<br />
-            Clean style.
+          <h2 className="mb-6 max-w-2xl text-2xl font-light leading-tight text-white md:text-3xl md:leading-snug">
+            Precision. Style. Confidence.
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-white/80 md:text-lg md:leading-relaxed">
-            Experience precision grooming with expert barbers who take pride in
-            their craft. Walk in looking good, walk out looking great.
-          </p>
-          <button
-            type="button"
-            onClick={onBook}
-            className="mt-8 w-full rounded-full bg-white py-4 text-sm font-bold uppercase tracking-wide text-black shadow-lg transition-all hover:scale-105 hover:bg-white/95 hover:shadow-xl active:scale-95 md:w-auto md:px-10 md:py-4"
-          >
-            Book Your Session
-          </button>
-        </div>
-      </section>
-
-      {/* Services Section with Enhanced Design */}
-      <section className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm md:p-8">
-        <div className="mb-6">
-          <h3 className="text-[10px] uppercase tracking-[0.2em] text-black/50 font-semibold">Our Services</h3>
-          <p className="mt-2 text-sm text-black/60">Professional grooming services tailored for you</p>
-        </div>
-        <div className="space-y-3">
-          {services.map((service, index) => (
-            <div
-              key={service._id}
-              className={`group flex items-center justify-between rounded-xl border border-black/5 bg-gradient-to-r from-white to-black/5 p-4 transition-all hover:border-black/10 hover:shadow-md ${
-                index < services.length - 1 ? 'mb-3' : ''
-              }`}
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <button
+              type="button"
+              onClick={onBook}
+              className="rounded-full bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-black transition-all hover:bg-gray-100 md:px-7 md:py-3"
             >
-              <div className="flex items-center gap-4">
-                {/* Service Icon */}
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-black/5 group-hover:bg-black/10 transition-colors">
-                  <svg className="h-6 w-6 text-black/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                </div>
-                <div>
-                  <span className="block text-base font-semibold text-black">{service.name}</span>
-                  <p className="mt-0.5 text-xs text-black/50">{service.duration} minutes</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-xl font-bold text-black">${service.price}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section className="relative overflow-hidden rounded-3xl border border-black/10 bg-white p-6 shadow-sm md:p-8">
-        <h3 className="text-[10px] uppercase tracking-[0.2em] text-black/50 font-semibold">About Salon Abed</h3>
-        <p className="mt-4 text-base leading-relaxed text-black/80 md:text-lg md:leading-relaxed">
-          Salon Abed is a premium barbershop dedicated to delivering exceptional grooming experiences.
-          Founded by Abed Merhi, we combine traditional barbering techniques with modern styling to create
-          the perfect look for every client. Our expert barbers are passionate about their craft and committed
-          to making you look and feel your absolute best.
-        </p>
-      </section>
-
-      {/* Working Hours with Enhanced Design */}
-      <section className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm md:p-8">
-        <h3 className="text-[10px] uppercase tracking-[0.2em] text-black/50 font-semibold">Working Hours</h3>
-        <div className="mt-5 space-y-3">
-          {settings?.workingHours?.map((day) => (
-            <div
-              key={day.day}
-              className={`flex items-center justify-between rounded-lg border border-black/5 px-4 py-3 transition-colors ${
-                day.isOpen ? 'bg-black/5' : 'bg-black/[0.02]'
-              }`}
+              BOOK APPOINTMENT
+            </button>
+            <button
+              type="button"
+              onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
+              className="rounded-full border-2 border-white bg-transparent px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition-all hover:bg-white hover:text-black md:px-7 md:py-3"
             >
-              <div className="flex items-center gap-3">
-                {/* Day Indicator */}
-                <div className={`h-2 w-2 rounded-full ${day.isOpen ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                <span className="font-medium text-black/80">{day.day}</span>
-              </div>
-              <span className={`font-semibold ${day.isOpen ? 'text-black' : 'text-black/40'}`}>
-                {day.isOpen ? `${day.openTime} - ${day.closeTime}` : 'Closed'}
-              </span>
-            </div>
-          ))}
+              OUR SERVICES
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* Homepage Sections with Enhanced Design */}
+      {/* Services Section */}
+      <section id="services" className="bg-gray-50 px-4 py-6 md:px-6 md:py-10">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-4 text-center">
+            <h3 className="mb-1 text-sm font-normal uppercase tracking-[0.2em] text-black md:text-base">
+              OUR SERVICES
+            </h3>
+            <p className="text-[10px] text-gray-600 md:text-xs">
+              Professional grooming tailored for the modern man.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            {services.map((service) => (
+              <div
+                key={service._id}
+                className="group w-[calc(33.333%-0.5rem)] rounded-xl bg-white p-4 text-center shadow-sm transition-all hover:shadow-md md:p-5"
+              >
+                <h4 className="mb-1 text-xs font-semibold text-black md:text-sm">{service.name}</h4>
+                <p className="mb-2 text-[10px] text-gray-500 md:text-xs">{service.duration} min</p>
+                <p className="text-base font-bold text-black md:text-lg">${service.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section className="bg-white px-4 py-6 md:px-6 md:py-10">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-4 text-center">
+            <h3 className="mb-1 text-sm font-normal uppercase tracking-[0.2em] text-black md:text-base">
+              WHY CHOOSE US
+            </h3>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            <div className="w-[calc(33.333%-0.5rem)] rounded-xl bg-gray-50 p-4 text-center md:p-5">
+              <h4 className="mb-2 text-xs font-semibold text-black md:text-sm">Expert Barbers</h4>
+              <p className="text-[10px] leading-relaxed text-gray-600 md:text-xs">
+                Skilled barbers delivering top-notch precision cuts and grooming.
+              </p>
+            </div>
+            <div className="w-[calc(33.333%-0.5rem)] rounded-xl bg-gray-50 p-4 text-center md:p-5">
+              <h4 className="mb-2 text-xs font-semibold text-black md:text-sm">On-Time Appointments</h4>
+              <p className="text-[10px] leading-relaxed text-gray-600 md:text-xs">
+                Punctual service ensuring you're never kept waiting for your haircut.
+              </p>
+            </div>
+            <div className="w-[calc(33.333%-0.5rem)] rounded-xl bg-gray-50 p-4 text-center md:p-5">
+              <h4 className="mb-2 text-xs font-semibold text-black md:text-sm">Premium Tools</h4>
+              <p className="text-[10px] leading-relaxed text-gray-600 md:text-xs">
+                We use only the finest, professional-grade tools and products.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
       {homepageSections.length > 0 && (
-        <>
-          {homepageSections.map((section, index) => (
-            <section
-              key={section._id}
-              className="group overflow-hidden rounded-3xl border border-black/10 bg-white shadow-sm transition-shadow hover:shadow-md"
-            >
-              <div className="aspect-video w-full overflow-hidden">
-                <img
-                  src={section.image.url}
-                  alt={section.description || 'Homepage section'}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                  width="1200"
-                  height="675"
-                />
-              </div>
-              {section.description && (
-                <div className="p-6 md:p-8">
-                  <p className="text-base leading-relaxed text-black/80 md:text-lg md:leading-relaxed">
-                    {section.description}
-                  </p>
+        <section className="bg-gray-50 px-4 py-10 md:px-6 md:py-14">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-6 text-center">
+              <h3 className="text-xl font-light uppercase tracking-[0.3em] text-black md:text-2xl">
+                GALLERY
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {homepageSections.map((section) => (
+                <div
+                  key={section._id}
+                  className="group aspect-square overflow-hidden rounded-lg"
+                >
+                  <img
+                    src={section.image.url}
+                    alt={section.description || 'Gallery image'}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
                 </div>
-              )}
-            </section>
-          ))}
-        </>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      
+      {/* Working Hours Section */}
+      {settings?.workingHours && (
+        <section className="bg-white px-4 py-10 md:px-6 md:py-14">
+          <div className="mx-auto max-w-3xl">
+            <div className="mb-6 text-center">
+              <h3 className="text-xl font-light uppercase tracking-[0.3em] text-black md:text-2xl">
+                OPENING HOURS
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {settings.workingHours.map((day) => (
+                <div
+                  key={day.day}
+                  className="flex items-center justify-between border-b border-gray-200 pb-3"
+                >
+                  <span className="text-sm font-medium text-black md:text-base">{day.day}</span>
+                  <span className={`text-sm md:text-base ${day.isOpen ? 'text-black' : 'text-gray-400'}`}>
+                    {day.isOpen ? `${day.openTime} - ${day.closeTime}` : 'Closed'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
     </div>
   );
